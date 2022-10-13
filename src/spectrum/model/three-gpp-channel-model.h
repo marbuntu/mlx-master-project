@@ -370,6 +370,13 @@ class ThreeGppChannelModel : public MatrixBasedChannelModel
         2;                            //!< index of the THETA value in the m_nonSelfBlocking array
     static const uint8_t Y_INDEX = 3; //!< index of the Y value in the m_nonSelfBlocking array
     static const uint8_t R_INDEX = 4; //!< index of the R value in the m_nonSelfBlocking array
+
+  const std::map<std::string, std::map<int,std::vector<float>>> *m_NTNDenseUrbanLOS; //The nested map containing the threegpp value tables for the NTN Dense Urban LOS scenario
+  const std::map<std::string, std::map<int,std::vector<float>>> *m_NTNDenseUrbanNLOS; //The nested map containing the threegpp value tables for the NTN Dense Urban NLOS scenario
+  const std::map<std::string, std::map<int,std::vector<float>>> *m_NTNUrbanLOS; //The nested map containing the threegpp value tables for the NTN Urban LOS scenario
+  const std::map<std::string, std::map<int,std::vector<float>>> *m_NTNUrbanNLOS; //The nested map containing the threegpp value tables for the NTN Urban NLOS scenario
+  const std::map<std::string, std::map<int,std::vector<float>>> *m_NTNSuburbanLOS; //The nested map containing the threegpp value tables for the NTN Suburban LOS scenario
+  const std::map<std::string, std::map<int,std::vector<float>>> *m_NTNSuburbanNLOS; //The nested map containing the threegpp value tables for the NTN Suburban NLOS scenario
 };
 } // namespace ns3
 
