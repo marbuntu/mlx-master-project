@@ -9,6 +9,7 @@ build_lib(
     model/phased-array-model.cc
     model/three-gpp-antenna-model.cc
     model/uniform-planar-array.cc
+    model/circular-aperture-antenna-model.cc
   HEADER_FILES
     model/angles.h
     model/antenna-model.h
@@ -18,6 +19,7 @@ build_lib(
     model/phased-array-model.h
     model/three-gpp-antenna-model.h
     model/uniform-planar-array.h
+    model/circular-aperture-antenna-model.h
   LIBRARIES_TO_LINK ${libcore}
   TEST_SOURCES
     test/test-angles.cc

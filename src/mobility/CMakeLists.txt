@@ -21,6 +21,7 @@ build_lib(
     model/steady-state-random-waypoint-mobility-model.cc
     model/waypoint-mobility-model.cc
     model/waypoint.cc
+    model/geocentric-constant-position-mobility-model.cc
   HEADER_FILES
     helper/group-mobility-helper.h
     helper/mobility-helper.h
@@ -42,6 +43,7 @@ build_lib(
     model/steady-state-random-waypoint-mobility-model.h
     model/waypoint-mobility-model.h
     model/waypoint.h
+    model/geocentric-constant-position-mobility-model.h
   LIBRARIES_TO_LINK ${libnetwork}
   TEST_SOURCES
     test/box-line-intersection-test.cc

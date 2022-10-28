@@ -25,6 +25,7 @@
 #include "ns3/integer.h"
 #include "ns3/log.h"
 #include "ns3/mobility-model.h"
+#include "ns3/geocentric-constant-position-mobility-model.h"
 #include "ns3/node.h"
 #include "ns3/phased-array-model.h"
 #include "ns3/pointer.h"
@@ -364,6 +365,86 @@ static const double sqrtC_NTN_Suburban_NLOS[6][6] = {
 };
 
 /**
+ * The square root matrix for <em>NTN Rural LOS</em>, which is generated
+ * using the Cholesky decomposition according to table 6.7.2-7 and follows
+ * the order of [SF, K, DS, ASD, ASA, ZSD, ZSA].
+ * 
+ * The Matlab file to generate the matrices can be found in
+ * https://github.com/nyuwireless-unipd/ns3-mmwave/blob/master/src/mmwave/model/BeamFormingMatrix/SqrtMatrix.m
+ */
+static const double sqrtC_NTN_Rural_LOS[7][7] = {
+{1, 0, 0, 0, 0, 0, 0},
+{0, 1, 0, 0, 0, 0, 0},
+{-0.5, 0, 0.866025, 0, 0, 0, 0},
+{0, 0, 0, 1, 0, 0, 0},
+{0, 0, 0, 0, 1, 0, 0},
+{0.01, 0, -0.0519615, 0.73, -0.2, 0.651383, 0},
+{-0.17, -0.02, 0.21362, -0.14, 0.24, 0.142773, 0.909661},
+};
+
+/**
+ * The square root matrix for <em>NTN Rural NLOS S Band</em>, which is generated
+ * using the Cholesky decomposition according to table 6.7.2-8a and follows
+ * the order of [SF, K, DS, ASD, ASA, ZSD, ZSA].
+ * 
+ * The square root matrix is dependent on the elevation angle, thus requiring a map.
+ * 
+ * The Matlab file to generate the matrices can be found in
+ * https://github.com/nyuwireless-unipd/ns3-mmwave/blob/master/src/mmwave/model/BeamFormingMatrix/SqrtMatrix.m
+ */
+static const std::map<int, std::vector<std::vector<double>>> sqrtC_NTN_Rural_NLOS_S{
+{10,
+{{1, 0, 0, 0, 0, 0},{-0.36, 0.932952, 0, 0, 0, 0},{0.45, 0.516639, 0.728412, 0, 0, 0},{0.02, 0.329277, 0.371881, 0.867687, 0, 0},{-0.06, 0.59853, 0.436258, -0.0324062, 0.668424, 0},{-0.07, 0.0373009, 0.305087, -0.0280496, -0.225204, 0.921481},}},
+{20,
+{{1, 0, 0, 0, 0, 0},{-0.39, 0.920815, 0, 0, 0, 0},{0.52, 0.426579, 0.740021, 0, 0, 0},{0, 0.347518, -0.0381664, 0.936896, 0, 0},{-0.04, 0.710675, 0.172483, 0.116993, 0.670748, 0},{-0.17, -0.0394216, 0.115154, 0.243458, -0.0702635, 0.944498},}},
+{30,
+{{1, 0, 0, 0, 0, 0},{-0.41, 0.912086, 0, 0, 0, 0},{0.54, 0.49491, 0.680782, 0, 0, 0},{0, 0.350844, -0.152231, 0.923977, 0, 0},{-0.04, 0.694672, 0.0702137, 0.0832998, 0.709903, 0},{-0.19, -0.0854087, 0.0805978, 0.283811, -0.137441, 0.922318},}},
+{40,
+{{1, 0, 0, 0, 0, 0},{-0.37, 0.929032, 0, 0, 0, 0},{0.53, 0.480177, 0.698949, 0, 0, 0},{0.01, 0.434538, 0.00864797, 0.900556, 0, 0},{-0.05, 0.765851, -0.0303947, 0.0421641, 0.63896, 0},{-0.17, -0.16458, 0.0989022, 0.158081, -0.150425, 0.941602},}},
+{50,
+{{1, 0, 0, 0, 0, 0},{-0.4, 0.916515, 0, 0, 0, 0},{0.55, 0.403703, 0.731111, 0, 0, 0},{0.02, 0.499719, -0.0721341, 0.862947, 0, 0},{-0.06, 0.835775, -0.156481, 0.0373835, 0.521534, 0},{-0.19, -0.301141, 0.145082, 0.144564, -0.0238067, 0.911427},}},
+{60,
+{{1, 0, 0, 0, 0, 0},{-0.41, 0.912086, 0, 0, 0, 0},{0.56, 0.339442, 0.755764, 0, 0, 0},{0.02, 0.436582, -0.0256617, 0.899076, 0, 0},{-0.07, 0.856608, -0.12116, 0.0715303, 0.491453, 0},{-0.2, -0.331109, 0.15136, 0.036082, 0.031313, 0.908391},}},
+{70,
+{{1, 0, 0, 0, 0, 0},{-0.4, 0.916515, 0, 0, 0, 0},{0.56, 0.386246, 0.732949, 0, 0, 0},{0.04, 0.573913, -0.0601289, 0.815726, 0, 0},{-0.11, 0.813953, -0.0720183, 0.0281118, 0.565158, 0},{-0.19, -0.432071, 0.236423, -0.0247788, -0.0557206, 0.847113},}},
+{80,
+{{1, 0, 0, 0, 0, 0},{-0.46, 0.887919, 0, 0, 0, 0},{0.58, 0.469412, 0.665772, 0, 0, 0},{0.01, 0.309262, -0.286842, 0.90663, 0, 0},{-0.05, 0.762457, -0.268721, -0.0467443, 0.584605, 0},{-0.23, -0.580909, 0.399665, 0.0403629, 0.326208, 0.584698},}},
+{90,
+{{1, 0, 0, 0, 0, 0},{-0.3, 0.953939, 0, 0, 0, 0},{0.47, 0.81871, 0.329868, 0, 0, 0},{0.06, 0.0712834, -0.595875, 0.797654, 0, 0},{-0.1, 0.408831, -0.0233859, 0.0412736, 0.905873, 0},{-0.13, -0.407783, 0.439436, -0.0768289, -0.212875, 0.756631},}},
+};
+
+/**
+ * The square root matrix for <em>NTN Rural NLOS Ka Band</em>, which is generated
+ * using the Cholesky decomposition according to table 6.7.2-8b and follows
+ * the order of [SF, K, DS, ASD, ASA, ZSD, ZSA].
+ * 
+ * The square root matrix is dependent on the elevation angle, thus requiring a map.
+ * 
+ * The Matlab file to generate the matrices can be found in
+ * https://github.com/nyuwireless-unipd/ns3-mmwave/blob/master/src/mmwave/model/BeamFormingMatrix/SqrtMatrix.m
+ */
+static const std::map<int, std::vector<std::vector<double>>> sqrtC_NTN_Rural_NLOS_Ka{
+{10,
+{{1, 0, 0, 0, 0, 0},{-0.36, 0.932952, 0, 0, 0, 0},{0.45, 0.527358, 0.72069, 0, 0, 0},{0.02, 0.350715, 0.355282, 0.866241, 0, 0},{-0.07, 0.562515, 0.478504, 0.0162932, 0.670406, 0},{-0.06, 0.0411597, 0.270982, 0.0121094, -0.159927, 0.946336},}},
+{20,
+{{1, 0, 0, 0, 0, 0},{-0.38, 0.924986, 0, 0, 0, 0},{0.52, 0.473088, 0.711188, 0, 0, 0},{0, 0.367573, -0.0617198, 0.927944, 0, 0},{-0.04, 0.68628, 0.149228, 0.115257, 0.701332, 0},{-0.16, -0.0441088, 0.118207, 0.251641, -0.0752458, 0.943131},}},
+{30,
+{{1, 0, 0, 0, 0, 0},{-0.42, 0.907524, 0, 0, 0, 0},{0.54, 0.48131, 0.690464, 0, 0, 0},{0, 0.363627, -0.137613, 0.921324, 0, 0},{-0.04, 0.686704, 0.117433, 0.104693, 0.708581, 0},{-0.19, -0.0438556, 0.0922685, 0.269877, -0.136292, 0.928469},}},
+{40,
+{{1, 0, 0, 0, 0, 0},{-0.36, 0.932952, 0, 0, 0, 0},{0.53, 0.483197, 0.696865, 0, 0, 0},{0.01, 0.464761, -0.0285153, 0.88492, 0, 0},{-0.05, 0.763169, 0.140255, 0.0562856, 0.626286, 0},{-0.16, -0.126051, 0.0942905, 0.195354, -0.217188, 0.92967},}},
+{50,
+{{1, 0, 0, 0, 0, 0},{-0.39, 0.920815, 0, 0, 0, 0},{0.55, 0.406705, 0.729446, 0, 0, 0},{0.01, 0.503793, -0.123923, 0.854831, 0, 0},{-0.06, 0.821664, -0.207246, 0.0245302, 0.526988, 0},{-0.19, -0.254231, 0.10679, 0.190931, -0.0665276, 0.920316},}},
+{60,
+{{1, 0, 0, 0, 0, 0},{-0.42, 0.907524, 0, 0, 0, 0},{0.56, 0.391395, 0.730213, 0, 0, 0},{0.02, 0.427978, -0.0393147, 0.902712, 0, 0},{-0.06, 0.820694, -0.119986, 0.105509, 0.545281, 0},{-0.2, -0.279882, 0.180145, 0.0563477, -0.0121631, 0.919723},}},
+{70,
+{{1, 0, 0, 0, 0, 0},{-0.36, 0.932952, 0, 0, 0, 0},{0.54, 0.519212, 0.662434, 0, 0, 0},{0.04, 0.412025, -0.0234416, 0.909992, 0, 0},{-0.09, 0.758452, -0.0682296, 0.0214276, 0.64151, 0},{-0.17, -0.387158, 0.306169, -0.0291255, -0.109344, 0.845378},}},
+{80,
+{{1, 0, 0, 0, 0, 0},{-0.44, 0.897998, 0, 0, 0, 0},{0.57, 0.43519, 0.696928, 0, 0, 0},{0.01, 0.316705, -0.248988, 0.915207, 0, 0},{-0.06, 0.805793, -0.296262, -0.0419182, 0.507514, 0},{-0.22, -0.497551, 0.289742, 0.0785823, 0.328773, 0.711214},}},
+{90,
+{{1, 0, 0, 0, 0, 0},{-0.27, 0.96286, 0, 0, 0, 0},{0.46, 0.741748, 0.488067, 0, 0, 0},{0.04, 0.0735309, -0.374828, 0.923308, 0, 0},{-0.08, 0.517624, 0.128779, 0.0795063, 0.838308, 0},{-0.11, -0.321646, 0.0802763, -0.131981, -0.193429, 0.907285},}},
+};
+
+/**
  * The enumerator used for code clarity when performing parameter assignment in GetThreeGppTable
  */
 enum table3gpp_params {
@@ -512,7 +593,7 @@ static const std::map<std::string, std::map<int,std::vector<float>>> NTNSuburban
 };
 
 /**
- * The nested map containing the threegpp value tables for the NTN Suburban LOS scenario
+ * The nested map containing the threegpp value tables for the NTN Suburban NLOS scenario
  */
 static const std::map<std::string, std::map<int,std::vector<float>>> NTNSuburbanNLOS{
   {"S",
@@ -539,6 +620,62 @@ static const std::map<std::string, std::map<int,std::vector<float>>> NTNSuburban
   }},
 };
 
+/**
+ * The nested map containing the threegpp value tables for the NTN Rural LOS scenario
+ */
+static const std::map<std::string, std::map<int,std::vector<float>>> NTNRuralLOS{
+  {"S",
+  {	{10,{-9.55,0.66,-3.42,0.89,-9.45,7.83,-4.2,6.3,-6.03,5.19,24.72,5.07,3.8,12.0,4.0,2.0,20.0,0.0,0.39,10.81,1.94,3.0,}},
+    {20,{-8.68,0.44,-3.0,0.63,-4.45,6.86,-2.31,5.04,-4.31,4.18,12.31,5.75,3.8,12.0,4.0,2.0,20.0,0.0,0.31,8.09,1.83,3.0,}},
+    {30,{-8.46,0.28,-2.86,0.52,-2.39,5.14,-0.28,0.81,-2.57,0.61,8.05,5.46,3.8,12.0,4.0,2.0,20.0,0.0,0.29,13.7,2.28,3.0,}},
+    {40,{-8.36,0.19,-2.78,0.45,-1.28,3.44,-0.38,1.16,-2.59,0.79,6.21,5.23,3.8,12.0,4.0,2.0,20.0,0.0,0.37,20.05,2.93,3.0,}},
+    {50,{-8.29,0.14,-2.7,0.42,-0.99,2.59,-0.38,0.82,-2.59,0.65,5.04,3.95,3.8,12.0,4.0,2.0,20.0,0.0,0.61,24.51,2.84,3.0,}},
+    {60,{-8.26,0.1,-2.66,0.41,-1.05,2.42,-0.46,0.67,-2.65,0.52,4.42,3.75,3.8,12.0,4.0,2.0,20.0,0.0,0.9,26.35,3.17,3.0,}},
+    {70,{-8.22,0.1,-2.53,0.42,-0.9,1.78,-0.49,1.0,-2.69,0.78,3.92,2.56,3.8,12.0,4.0,2.0,20.0,0.0,1.43,31.84,3.88,3.0,}},
+    {80,{-8.2,0.05,-2.21,0.5,-0.89,1.65,-0.53,1.18,-2.65,1.01,3.65,1.77,3.8,12.0,4.0,2.0,20.0,0.0,2.87,36.62,4.17,3.0,}},
+    {90,{-8.19,0.06,-1.78,0.91,-0.81,1.26,-0.46,0.91,-2.65,0.71,3.59,1.77,3.8,12.0,4.0,2.0,20.0,0.0,5.48,36.77,4.29,3.0,}},
+  }},
+  {"Ka",
+  {	{10,{-9.68,0.46,-4.03,0.91,-9.74,7.52,-5.85,6.51,-7.45,5.3,25.43,7.04,3.8,12.0,4.0,2.0,20.0,0.0,0.36,4.63,0.75,3.0,}},
+    {20,{-8.86,0.29,-3.55,0.7,-4.88,6.67,-3.27,5.36,-5.25,4.42,12.72,7.47,3.8,12.0,4.0,2.0,20.0,0.0,0.3,6.83,1.25,3.0,}},
+    {30,{-8.59,0.18,-3.45,0.55,-2.6,4.63,-0.88,0.93,-3.16,0.68,8.4,7.18,3.8,12.0,4.0,2.0,20.0,0.0,0.25,12.91,1.93,3.0,}},
+    {40,{-8.46,0.19,-3.38,0.52,-1.92,3.45,-0.93,0.96,-3.15,0.73,6.52,6.88,3.8,12.0,4.0,2.0,20.0,0.0,0.35,18.9,2.37,3.0,}},
+    {50,{-8.36,0.14,-3.33,0.46,-1.56,2.44,-0.99,0.97,-3.2,0.77,5.24,5.28,3.8,12.0,4.0,2.0,20.0,0.0,0.53,22.44,2.66,3.0,}},
+    {60,{-8.3,0.15,-3.29,0.43,-1.66,2.38,-1.04,0.83,-3.27,0.61,4.57,4.92,3.8,12.0,4.0,2.0,20.0,0.0,0.88,25.69,3.23,3.0,}},
+    {70,{-8.26,0.13,-3.24,0.46,-1.59,1.67,-1.17,1.01,-3.42,0.74,4.02,3.4,3.8,12.0,4.0,2.0,20.0,0.0,1.39,27.95,3.71,3.0,}},
+    {80,{-8.22,0.03,-2.9,0.44,-1.58,1.44,-1.19,1.01,-3.36,0.79,3.7,2.22,3.8,12.0,4.0,2.0,20.0,0.0,2.7,31.45,4.17,3.0,}},
+    {90,{-8.21,0.07,-2.5,0.82,-1.51,1.13,-1.13,0.85,-3.35,0.65,3.62,2.28,3.8,12.0,4.0,2.0,20.0,0.0,4.97,28.01,4.14,3.0,}},
+  }},
+};
+
+/**
+ * The nested map containing the threegpp value tables for the NTN Rural NLOS scenario
+ */
+static const std::map<std::string, std::map<int,std::vector<float>>> NTNRuralNLOS{
+  {"S",
+  {	{10,{-9.01,1.59,-2.9,1.34,-3.33,6.22,-0.88,3.26,-4.92,3.96,0.0,0.0,1.7,7.0,3.0,3.0,20.0,0.0,0.03,18.16,2.32,3.0,}},
+    {20,{-8.37,0.95,-2.5,1.18,-0.74,4.22,-0.07,3.29,-4.06,4.07,0.0,0.0,1.7,7.0,3.0,3.0,20.0,0.0,0.05,26.82,7.34,3.0,}},
+    {30,{-8.05,0.92,-2.12,1.08,0.08,3.02,0.75,1.92,-2.33,1.7,0.0,0.0,1.7,7.0,3.0,2.0,20.0,0.0,0.07,21.99,8.28,3.0,}},
+    {40,{-7.92,0.92,-1.99,1.06,0.32,2.45,0.72,1.92,-2.24,2.01,0.0,0.0,1.7,7.0,3.0,2.0,20.0,0.0,0.1,22.86,8.76,3.0,}},
+    {50,{-7.92,0.87,-1.9,1.05,0.53,1.63,0.95,1.45,-2.24,2.0,0.0,0.0,1.7,7.0,3.0,2.0,20.0,0.0,0.15,25.93,9.68,3.0,}},
+    {60,{-7.96,0.87,-1.85,1.06,0.33,2.08,0.97,1.62,-2.22,1.82,0.0,0.0,1.7,7.0,3.0,2.0,20.0,0.0,0.22,27.79,9.94,3.0,}},
+    {70,{-7.91,0.82,-1.69,1.14,0.55,1.58,1.1,1.43,-2.19,1.66,0.0,0.0,1.7,7.0,3.0,2.0,20.0,0.0,0.5,28.5,8.9,3.0,}},
+    {80,{-7.79,0.86,-1.46,1.16,0.45,2.01,0.97,1.88,-2.41,2.58,0.0,0.0,1.7,7.0,3.0,2.0,20.0,0.0,1.04,37.53,13.74,3.0,}},
+    {90,{-7.74,0.81,-1.32,1.3,0.4,2.19,1.35,0.62,-2.45,2.52,0.0,0.0,1.7,7.0,3.0,2.0,20.0,0.0,2.11,29.23,12.16,3.0,}},
+  }},
+  {"Ka",
+  {	{10,{-9.13,1.91,-2.9,1.32,-3.4,6.28,-1.19,3.81,-5.47,4.39,0.0,0.0,1.7,7.0,3.0,3.0,20.0,0.0,0.03,18.21,2.13,3.0,}},
+    {20,{-8.39,0.94,-2.53,1.18,-0.51,3.75,-0.11,3.33,-4.06,4.04,0.0,0.0,1.7,7.0,3.0,3.0,20.0,0.0,0.05,24.08,6.52,3.0,}},
+    {30,{-8.1,0.92,-2.16,1.08,0.06,2.95,0.72,1.93,-2.32,1.54,0.0,0.0,1.7,7.0,3.0,2.0,20.0,0.0,0.07,22.06,7.72,3.0,}},
+    {40,{-7.96,0.94,-2.04,1.09,0.2,2.65,0.69,1.91,-2.19,1.73,0.0,0.0,1.7,7.0,3.0,2.0,20.0,0.0,0.09,21.4,8.45,3.0,}},
+    {50,{-7.99,0.89,-1.99,1.08,0.4,1.85,0.84,1.7,-2.16,1.5,0.0,0.0,1.7,7.0,3.0,2.0,20.0,0.0,0.16,24.26,8.92,3.0,}},
+    {60,{-8.05,0.87,-1.95,1.06,0.32,1.83,0.99,1.27,-2.24,1.64,0.0,0.0,1.7,7.0,3.0,2.0,20.0,0.0,0.22,24.15,8.76,3.0,}},
+    {70,{-8.01,0.82,-1.81,1.17,0.46,1.57,0.95,1.86,-2.29,1.66,0.0,0.0,1.7,7.0,3.0,2.0,20.0,0.0,0.51,25.99,9.0,3.0,}},
+    {80,{-8.05,1.65,-1.56,1.2,0.33,1.99,0.92,1.84,-2.65,2.86,0.0,0.0,1.7,7.0,3.0,2.0,20.0,0.0,0.89,36.07,13.6,3.0,}},
+    {90,{-7.91,0.76,-1.53,1.27,0.24,2.18,1.29,0.59,-2.23,1.12,0.0,0.0,1.7,7.0,3.0,2.0,20.0,0.0,1.68,24.51,10.56,3.0,}},
+  }},
+};
+
 ThreeGppChannelModel::ThreeGppChannelModel ()
 {
     NS_LOG_FUNCTION(this);
@@ -556,6 +693,8 @@ ThreeGppChannelModel::ThreeGppChannelModel ()
   m_NTNUrbanNLOS = &NTNUrbanNLOS;
   m_NTNSuburbanLOS = &NTNSuburbanLOS;
   m_NTNSuburbanNLOS = &NTNSuburbanNLOS;
+  m_NTNRuralLOS = &NTNRuralLOS;
+  m_NTNRuralNLOS = &NTNRuralNLOS;
 }
 
 ThreeGppChannelModel::~ThreeGppChannelModel()
@@ -695,12 +834,18 @@ ThreeGppChannelModel::GetScenario() const
 }
 
 Ptr<const ThreeGppChannelModel::ParamsTable>
-ThreeGppChannelModel::GetThreeGppTable(Ptr<const ChannelCondition> channelCondition,
-                                       double hBS,
-                                       double hUT,
-                                       double distance2D) const
+ThreeGppChannelModel::GetThreeGppTable (const Ptr<const MobilityModel> aMob,
+                                        const Ptr<const MobilityModel> bMob,
+                                        Ptr<const ChannelCondition> channelCondition) const
 {
     NS_LOG_FUNCTION(this);
+
+  // NOTE we assume hUT = min (height(a), height(b)) and
+  // hBS = max (height (a), height (b))
+  double hUT = std::min (aMob->GetPosition ().z, bMob->GetPosition ().z);
+  double hBS = std::max (aMob->GetPosition ().z, bMob->GetPosition ().z);
+
+  double distance2D = sqrt (pow(aMob->GetPosition ().x - bMob->GetPosition ().x,2) + pow(aMob->GetPosition ().y - bMob->GetPosition ().y,2));
 
     double fcGHz = m_frequency / 1.0e9;
     Ptr<ParamsTable> table3gpp = Create<ParamsTable>();
@@ -1352,9 +1497,46 @@ ThreeGppChannelModel::GetThreeGppTable(Ptr<const ChannelCondition> channelCondit
   else if(m_scenario.substr(0,3)=="NTN")
     {
       std::string freq_band = (fcGHz<13) ? "S" : "Ka";
-      float elev_angle = 54.613; //TEMPORARY. This will be calculated from the Mobility Models
-      int elev_angle_quantized = roundf(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90.
-                                                //Checks will be needed for negative angles (error) and angles over 90 deg.
+
+      double elev_angle = 0;
+
+      bool satellite = false; //flag to indicate if one of the two nodes is a satellite
+                              //if so, parameters will be set accordingly to NOTE 8 of Table 6.7.2 from 3GPP 38.811 V15.4.0 (2020-09)
+
+      Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(aMob);
+      Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(bMob);
+
+      
+      if(DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(aMob)) && //Transform to NS_ASSERT
+         DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(bMob))) //check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
+      {
+        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
+        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+
+        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
+        {
+          elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
+          if(bNTNMob->GetGeocentricPosition().z > 50000)
+          {
+            satellite = true;
+          }
+        }
+        else //a is the HAPS/Satellite
+        {
+          elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
+          if(aNTNMob->GetGeocentricPosition().z > 50000)
+          {
+            satellite = true;
+          }
+        }
+      }
+      else
+      {
+        NS_FATAL_ERROR ("Mobility Models needs to be of type Geocentric for NTN scenarios");
+      }
+
+      int elev_angle_quantized = (elev_angle<10) ? 10 : round(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90.
+
 
       if(m_scenario=="NTN-DenseUrban")
         {
@@ -1362,14 +1544,22 @@ ThreeGppChannelModel::GetThreeGppTable(Ptr<const ChannelCondition> channelCondit
             {
               table3gpp->m_uLgDS=(*m_NTNDenseUrbanLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uLgDS];
               table3gpp->m_sigLgDS=(*m_NTNDenseUrbanLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigLgDS];
+
+              //table3gpp->m_uLgASD=-1.79769e+308;  //FOR SATELLITES
               table3gpp->m_uLgASD=(*m_NTNDenseUrbanLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uLgASD];
+              //table3gpp->m_sigLgASD=0; //FOR SATELLITES
               table3gpp->m_sigLgASD=(*m_NTNDenseUrbanLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigLgASD];
+
               table3gpp->m_uLgASA=(*m_NTNDenseUrbanLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uLgASA];
               table3gpp->m_sigLgASA=(*m_NTNDenseUrbanLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigLgASA];
               table3gpp->m_uLgZSA=(*m_NTNDenseUrbanLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uLgZSA];
               table3gpp->m_sigLgZSA=(*m_NTNDenseUrbanLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigLgZSA];
+
+              //table3gpp->m_uLgZSD=-1.79769e+308;  //FOR SATELLITES
               table3gpp->m_uLgZSD=(*m_NTNDenseUrbanLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uLgZSD];
+              //table3gpp->m_sigLgZSD= 0; //FOR SATELLITES
               table3gpp->m_sigLgZSD=(*m_NTNDenseUrbanLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigLgZSD];
+
               table3gpp->m_uK=(*m_NTNDenseUrbanLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uK];
               table3gpp->m_sigK=(*m_NTNDenseUrbanLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigK];
               table3gpp->m_rTau=(*m_NTNDenseUrbanLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::rTau];
@@ -1566,13 +1756,93 @@ ThreeGppChannelModel::GetThreeGppTable(Ptr<const ChannelCondition> channelCondit
         {
           if(channelCondition->IsLos())
             {
+              table3gpp->m_uLgDS=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uLgDS];
+              table3gpp->m_sigLgDS=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigLgDS];
+              table3gpp->m_uLgASD=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uLgASD];
+              table3gpp->m_sigLgASD=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigLgASD];
+              table3gpp->m_uLgASA=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uLgASA];
+              table3gpp->m_sigLgASA=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigLgASA];
+              table3gpp->m_uLgZSA=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uLgZSA];
+              table3gpp->m_sigLgZSA=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigLgZSA];
+              table3gpp->m_uLgZSD=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uLgZSD];
+              table3gpp->m_sigLgZSD=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigLgZSD];
+              table3gpp->m_uK=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uK];
+              table3gpp->m_sigK=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigK];
+              table3gpp->m_rTau=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::rTau];
+              table3gpp->m_uXpr=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uXpr];
+              table3gpp->m_sigXpr=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigXpr];
+              table3gpp->m_numOfCluster=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::numOfCluster];
+              table3gpp->m_raysPerCluster=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::raysPerCluster];
+              table3gpp->m_cDS=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::cDS];
+              table3gpp->m_cASD=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::cASD];
+              table3gpp->m_cASA=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::cASA];
+              table3gpp->m_cZSA=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::cZSA];
+              table3gpp->m_perClusterShadowingStd=(*m_NTNRuralLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::perClusterShadowingStd];
+
+              for (uint8_t row = 0; row < 7; row++)
+                {
+                  for (uint8_t column = 0; column < 7; column++)
+                    {
+                      table3gpp->m_sqrtC[row][column] = sqrtC_NTN_Rural_LOS[row][column];
+                    }
+                }
 
             }
           else if(channelCondition->IsNlos())
             {
+              table3gpp->m_uLgDS=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uLgDS];
+              table3gpp->m_sigLgDS=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigLgDS];
+              table3gpp->m_uLgASD=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uLgASD];
+              table3gpp->m_sigLgASD=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigLgASD];
+              table3gpp->m_uLgASA=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uLgASA];
+              table3gpp->m_sigLgASA=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigLgASA];
+              table3gpp->m_uLgZSA=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uLgZSA];
+              table3gpp->m_sigLgZSA=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigLgZSA];
+              table3gpp->m_uLgZSD=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uLgZSD];
+              table3gpp->m_sigLgZSD=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigLgZSD];
+              table3gpp->m_uK=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uK];
+              table3gpp->m_sigK=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigK];
+              table3gpp->m_rTau=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::rTau];
+              table3gpp->m_uXpr=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::uXpr];
+              table3gpp->m_sigXpr=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::sigXpr];
+              table3gpp->m_numOfCluster=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::numOfCluster];
+              table3gpp->m_raysPerCluster=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::raysPerCluster];
+              table3gpp->m_cDS=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::cDS];
+              table3gpp->m_cASD=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::cASD];
+              table3gpp->m_cASA=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::cASA];
+              table3gpp->m_cZSA=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::cZSA];
+              table3gpp->m_perClusterShadowingStd=(*m_NTNRuralNLOS).at(freq_band).at(elev_angle_quantized)[table3gpp_params::perClusterShadowingStd];
+
+              if(freq_band=="S")
+                {
+                  for (uint8_t row = 0; row < 6; row++)
+                    {
+                      for (uint8_t column = 0; column < 6; column++)
+                        {
+                          table3gpp->m_sqrtC[row][column] = sqrtC_NTN_Rural_NLOS_S.at(elev_angle_quantized)[row][column];
+                        }
+                    }
+                }
+              else if(freq_band=="Ka")
+                {
+                  for (uint8_t row = 0; row < 6; row++)
+                    {
+                      for (uint8_t column = 0; column < 6; column++)
+                        {
+                          table3gpp->m_sqrtC[row][column] = sqrtC_NTN_Rural_NLOS_Ka.at(elev_angle_quantized)[row][column];
+                        }
+                    }
+                }
 
             }
         }
+      if(satellite) //Parameters that should be set to -inf are instead set to the minimum value of double
+      {
+        table3gpp->m_uLgASD=-1.79769e+308;  //FOR SATELLITES
+        table3gpp->m_sigLgASD=0; //FOR SATELLITES
+        table3gpp->m_uLgZSD=-1.79769e+308;  //FOR SATELLITES
+        table3gpp->m_sigLgZSD= 0; //FOR SATELLITES
+      }
     }
     else
     {
@@ -1655,17 +1925,8 @@ ThreeGppChannelModel::GetChannel(Ptr<const MobilityModel> aMob,
         notFoundParams = true;
     }
 
-    double x = aMob->GetPosition().x - bMob->GetPosition().x;
-    double y = aMob->GetPosition().y - bMob->GetPosition().y;
-    double distance2D = sqrt(x * x + y * y);
-
-    // NOTE we assume hUT = min (height(a), height(b)) and
-    // hBS = max (height (a), height (b))
-    double hUt = std::min(aMob->GetPosition().z, bMob->GetPosition().z);
-    double hBs = std::max(aMob->GetPosition().z, bMob->GetPosition().z);
-
-    // get the 3GPP parameters
-    Ptr<const ParamsTable> table3gpp = GetThreeGppTable(condition, hBs, hUt, distance2D);
+  // get the 3GPP parameters
+  Ptr<const ParamsTable> table3gpp = GetThreeGppTable (aMob, bMob, condition);
 
     if (notFoundParams || updateParams)
     {

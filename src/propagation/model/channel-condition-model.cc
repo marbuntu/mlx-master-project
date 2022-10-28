@@ -25,6 +25,8 @@
 #include "ns3/node.h"
 #include "ns3/simulator.h"
 #include "ns3/string.h"
+#include "ns3/geocentric-constant-position-mobility-model.h"
+#include "ns3/pointer.h"
 
 #include <cmath>
 
@@ -827,6 +829,346 @@ ThreeGppIndoorOpenOfficeChannelConditionModel::ComputePlos(Ptr<const MobilityMod
     }
 
     return pLos;
+}
+
+// ------------------------------------------------------------------------- //
+
+/*const std::map<std::string, std::map<int, double>> NTN_LOS_Probability = {
+  {"Dense Urban",
+  {	{10,{28.2}},
+    {20,{33.1}},
+    {30,{39.8}},
+    {40,{46.8}},
+    {50,{53.7}},
+    {60,{61.2}},
+    {70,{73.8}},
+    {80,{82.0}},
+    {90,{98.1}},
+  }},
+  {"Urban",
+  {	{10,{24.6}},
+    {20,{38.6}},
+    {30,{49.3}},
+    {40,{61.3}},
+    {50,{72.6}},
+    {60,{80.5}},
+    {70,{91.9}},
+    {80,{96.8}},
+    {90,{99.2}},
+  }},
+  {"Suburban Rural",
+  {	{10,{78.2}},
+    {20,{86.9}},
+    {30,{91.9}},
+    {40,{92.9}},
+    {50,{93.5}},
+    {60,{94.0}},
+    {70,{94.9}},
+    {80,{95.2}},
+    {90,{99.8}},
+  }},
+}; */
+
+// ------------------------------------------------------------------------- //
+
+NS_OBJECT_ENSURE_REGISTERED (ThreeGppNTNDenseUrbanChannelConditionModel);
+
+TypeId
+ThreeGppNTNDenseUrbanChannelConditionModel::GetTypeId (void)
+{
+  static TypeId tid = TypeId ("ns3::ThreeGppNTNDenseUrbanChannelConditionModel")
+    .SetParent<ThreeGppChannelConditionModel> ()
+    .SetGroupName ("Propagation")
+    .AddConstructor<ThreeGppNTNDenseUrbanChannelConditionModel> ()
+  ;
+  return tid;
+}
+
+ThreeGppNTNDenseUrbanChannelConditionModel::ThreeGppNTNDenseUrbanChannelConditionModel ()
+  : ThreeGppChannelConditionModel ()
+{}
+
+ThreeGppNTNDenseUrbanChannelConditionModel::~ThreeGppNTNDenseUrbanChannelConditionModel ()
+{}
+
+double
+ThreeGppNTNDenseUrbanChannelConditionModel::ComputePlos (Ptr<const MobilityModel> a,
+                                                            Ptr<const MobilityModel> b) const
+{
+  double elev_angle = 0;
+
+  //LOS probability from table 6.6.1-1 of 3GPP 38.811
+  std::map<int,double> DenseUrbanLOSProb {
+    {10,{28.2}},
+    {20,{33.1}},
+    {30,{39.8}},
+    {40,{46.8}},
+    {50,{53.7}},
+    {60,{61.2}},
+    {70,{73.8}},
+    {80,{82.0}},
+    {90,{98.1}},
+  };
+
+  Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
+  Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
+
+  if(DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) && //Transform to NS_ASSERT
+  DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(b))) //check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
+  {
+    Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
+    Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+
+    if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+    {
+      elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
+    }
+    else //a is the HAPS/Satellite
+    {
+       elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
+    }
+  }
+  else
+  {
+    NS_FATAL_ERROR ("Mobility Models needs to be of type Geocentric for NTN scenarios");
+  }
+
+  int elev_angle_quantized = (elev_angle<10) ? 10 : round(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90.
+
+  // compute the LOS probability (see 3GPP TR 38.811, Table 6.6.1-1)
+  double pLos = 0.0;
+
+  pLos = DenseUrbanLOSProb.at((elev_angle_quantized));
+
+  return pLos;
+}
+
+// ------------------------------------------------------------------------- //
+
+NS_OBJECT_ENSURE_REGISTERED (ThreeGppNTNUrbanChannelConditionModel);
+
+TypeId
+ThreeGppNTNUrbanChannelConditionModel::GetTypeId (void)
+{
+  static TypeId tid = TypeId ("ns3::ThreeGppNTNUrbanChannelConditionModel")
+    .SetParent<ThreeGppChannelConditionModel> ()
+    .SetGroupName ("Propagation")
+    .AddConstructor<ThreeGppNTNUrbanChannelConditionModel> ()
+  ;
+  return tid;
+}
+
+ThreeGppNTNUrbanChannelConditionModel::ThreeGppNTNUrbanChannelConditionModel ()
+  : ThreeGppChannelConditionModel ()
+{
+  NS_LOG_UNCOND("Dense Urban Prop Model Constructor");
+}
+
+ThreeGppNTNUrbanChannelConditionModel::~ThreeGppNTNUrbanChannelConditionModel ()
+{}
+
+double
+ThreeGppNTNUrbanChannelConditionModel::ComputePlos (Ptr<const MobilityModel> a,
+                                                            Ptr<const MobilityModel> b) const
+{
+  double elev_angle = 0;
+
+  //LOS probability from table 6.6.1-1 of 3GPP 38.811
+  std::map<int,double> UrbanLOSProb {
+    {10,{24.6}},
+    {20,{38.6}},
+    {30,{49.3}},
+    {40,{61.3}},
+    {50,{72.6}},
+    {60,{80.5}},
+    {70,{91.9}},
+    {80,{96.8}},
+    {90,{99.2}},
+  };
+
+  Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
+  Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
+
+  if(DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) && //Transform to NS_ASSERT
+  DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(b))) //check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
+  {
+    Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
+    Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+
+    if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+    {
+      elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
+    }
+    else //a is the HAPS/Satellite
+    {
+       elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
+    }
+  }
+  else
+  {
+    NS_FATAL_ERROR ("Mobility Models needs to be of type Geocentric for NTN scenarios");
+  }
+
+  int elev_angle_quantized = (elev_angle<10) ? 10 : round(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90.
+
+  // compute the LOS probability (see 3GPP TR 38.811, Table 6.6.1-1)
+  double pLos = 0.0;
+
+  pLos = UrbanLOSProb.at((elev_angle_quantized));
+
+  return pLos;
+}
+
+// ------------------------------------------------------------------------- //
+
+NS_OBJECT_ENSURE_REGISTERED (ThreeGppNTNSuburbanChannelConditionModel);
+
+TypeId
+ThreeGppNTNSuburbanChannelConditionModel::GetTypeId (void)
+{
+  static TypeId tid = TypeId ("ns3::ThreeGppNTNSuburbanChannelConditionModel")
+    .SetParent<ThreeGppChannelConditionModel> ()
+    .SetGroupName ("Propagation")
+    .AddConstructor<ThreeGppNTNSuburbanChannelConditionModel> ()
+  ;
+  return tid;
+}
+
+ThreeGppNTNSuburbanChannelConditionModel::ThreeGppNTNSuburbanChannelConditionModel ()
+  : ThreeGppChannelConditionModel ()
+{
+  NS_LOG_UNCOND("Dense Urban Prop Model Constructor");
+}
+
+ThreeGppNTNSuburbanChannelConditionModel::~ThreeGppNTNSuburbanChannelConditionModel ()
+{}
+
+double
+ThreeGppNTNSuburbanChannelConditionModel::ComputePlos (Ptr<const MobilityModel> a,
+                                                            Ptr<const MobilityModel> b) const
+{
+  double elev_angle = 0;
+
+  //LOS probability from table 6.6.1-1 of 3GPP 38.811
+  std::map<int,double> SuburbanLOSProb {
+    {10,{78.2}},
+    {20,{86.9}},
+    {30,{91.9}},
+    {40,{92.9}},
+    {50,{93.5}},
+    {60,{94.0}},
+    {70,{94.9}},
+    {80,{95.2}},
+    {90,{99.8}},
+  };
+
+  Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
+  Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
+
+  if(DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) && //Transform to NS_ASSERT
+  DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(b))) //check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
+  {
+    Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
+    Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+
+    if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+    {
+      elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
+    }
+    else //a is the HAPS/Satellite
+    {
+       elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
+    }
+  }
+  else
+  {
+    NS_FATAL_ERROR ("Mobility Models needs to be of type Geocentric for NTN scenarios");
+  }
+
+  int elev_angle_quantized = (elev_angle<10) ? 10 : round(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90.
+
+  // compute the LOS probability (see 3GPP TR 38.811, Table 6.6.1-1)
+  double pLos = 0.0;
+
+  pLos = SuburbanLOSProb.at((elev_angle_quantized));
+
+  return pLos;
+}
+
+// ------------------------------------------------------------------------- //
+
+NS_OBJECT_ENSURE_REGISTERED (ThreeGppNTNRuralChannelConditionModel);
+
+TypeId
+ThreeGppNTNRuralChannelConditionModel::GetTypeId (void)
+{
+  static TypeId tid = TypeId ("ns3::ThreeGppNTNRuralChannelConditionModel")
+    .SetParent<ThreeGppChannelConditionModel> ()
+    .SetGroupName ("Propagation")
+    .AddConstructor<ThreeGppNTNRuralChannelConditionModel> ()
+  ;
+  return tid;
+}
+
+ThreeGppNTNRuralChannelConditionModel::ThreeGppNTNRuralChannelConditionModel ()
+  : ThreeGppChannelConditionModel ()
+{
+  NS_LOG_UNCOND("Dense Urban Prop Model Constructor");
+}
+
+ThreeGppNTNRuralChannelConditionModel::~ThreeGppNTNRuralChannelConditionModel ()
+{}
+
+double
+ThreeGppNTNRuralChannelConditionModel::ComputePlos (Ptr<const MobilityModel> a,
+                                                            Ptr<const MobilityModel> b) const
+{
+  double elev_angle = 0;
+
+  //LOS probability from table 6.6.1-1 of 3GPP 38.811
+  std::map<int,double> RuralLOSProb {
+    {10,{78.2}},
+    {20,{86.9}},
+    {30,{91.9}},
+    {40,{92.9}},
+    {50,{93.5}},
+    {60,{94.0}},
+    {70,{94.9}},
+    {80,{95.2}},
+    {90,{99.8}},
+  };
+
+  Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
+  Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
+
+  if(DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) && //Transform to NS_ASSERT
+  DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(b))) //check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
+  {
+    Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
+    Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+
+    if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+    {
+      elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
+    }
+    else //a is the HAPS/Satellite
+    {
+       elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
+    }
+  }
+  else
+  {
+    NS_FATAL_ERROR ("Mobility Models needs to be of type Geocentric for NTN scenarios");
+  }
+
+  int elev_angle_quantized = (elev_angle<10) ? 10 : round(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90.
+
+  // compute the LOS probability (see 3GPP TR 38.811, Table 6.6.1-1)
+  double pLos = 0.0;
+
+  pLos = RuralLOSProb.at((elev_angle_quantized));
+
+  return pLos;
 }
 
 } // end namespace ns3
