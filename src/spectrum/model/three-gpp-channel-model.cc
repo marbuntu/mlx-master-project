@@ -731,7 +731,8 @@ ThreeGppChannelModel::GetTypeId()
                           MakeDoubleChecker<double>())
             .AddAttribute(
                 "Scenario",
-                "The 3GPP scenario (RMa, UMa, UMi-StreetCanyon, InH-OfficeOpen, InH-OfficeMixed)",
+                "The 3GPP scenario (RMa, UMa, UMi-StreetCanyon, InH-OfficeOpen, InH-OfficeMixed, "
+                "NTN-DenseUrban, NTN-Urban, NTN-Suburban, NTN-Rural)",
                 StringValue("UMa"),
                 MakeStringAccessor(&ThreeGppChannelModel::SetScenario,
                                    &ThreeGppChannelModel::GetScenario),
@@ -1516,7 +1517,7 @@ ThreeGppChannelModel::GetThreeGppTable (const Ptr<const MobilityModel> aMob,
         if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
         {
           elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
-          if(bNTNMob->GetGeocentricPosition().z > 50000)
+          if(bNTNMob->GetGeographicPosition().z > 50000)
           {
             satellite = true;
           }
@@ -1524,7 +1525,7 @@ ThreeGppChannelModel::GetThreeGppTable (const Ptr<const MobilityModel> aMob,
         else //a is the HAPS/Satellite
         {
           elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
-          if(aNTNMob->GetGeocentricPosition().z > 50000)
+          if(aNTNMob->GetGeographicPosition().z > 50000)
           {
             satellite = true;
           }
@@ -2184,10 +2185,10 @@ ThreeGppChannelModel::GenerateChannelParameters(const Ptr<const ChannelCondition
   //Added case 2 and 3 for the NTN according to table 6.7.2-1aa (28.811)
     switch (table3gpp->m_numOfCluster) // Table 7.5-2
     {
-      case 2:
+    case 2:
         cNlos = 0.501;
         break;
-        case 3:
+    case 3:
         cNlos = 0.680;
         break;
     case 4:
@@ -2238,12 +2239,15 @@ ThreeGppChannelModel::GenerateChannelParameters(const Ptr<const ChannelCondition
   //Added case 2, 3 and 4 for the NTN according to table 6.7.2-1ab (28.811)
     switch (table3gpp->m_numOfCluster) // Table 7.5-4
     {
-      case 2:
+    case 2:
         cNlos = 0.430;
-      case 3:
+        break;
+    case 3:
         cNlos = 0.594;
-      case 4:
+        break;
+    case 4:
         cNlos = 0.697;
+        break;
     case 8:
         cNlos = 0.889;
         break;

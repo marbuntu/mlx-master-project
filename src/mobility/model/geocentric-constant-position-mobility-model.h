@@ -49,6 +49,10 @@ public:
   virtual void SetGeographicPosition (const Vector &position);
   virtual Vector GetGeocentricPosition (void) const;
   virtual void SetGeocentricPosition (const Vector &position);
+  virtual void SetCoordinateTranslationReferencePoint(const Vector &refPoint);
+  virtual Vector GetCoordinateTranslationReferencePoint(void) const;
+  virtual Vector GetPosition (void) const;
+  virtual void SetPosition (const Vector &position);
 
 private:
   virtual Vector DoGetPosition (void) const;
@@ -83,6 +87,19 @@ private:
    * \return the elevation angle in degrees
    */
   virtual double DoGetElevationAngle(Ptr<const GeocentricConstantPositionMobilityModel> other);
+  /**
+   * \brief Set the reference point for coordinate translation
+   * \param refPoint vector containing the geographic reference point
+   */
+  virtual void DoSetCoordinateTranslationReferencePoint(const Vector &refPoint);
+  /**
+   * \brief Get the reference point for coordinate translation
+   * \return Vector containing geographic reference point
+   */
+  virtual Vector DoGetCoordinateTranslationReferencePoint(void) const;
+
+
+
   virtual Vector DoGetVelocity (void) const;
 
   /**
@@ -92,6 +109,7 @@ private:
    * altitude
    */
   Vector m_position;
+  Vector m_geographicReferencePoint {0,0,0}; //<! This is the point taken as reference when converting from geographic to topographic (aka planar Cartesian)
 };
 
 } // namespace ns3

@@ -919,7 +919,7 @@ ThreeGppNTNDenseUrbanChannelConditionModel::ComputePlos (Ptr<const MobilityModel
     Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
     Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
 
-    if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+    if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
     {
       elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
     }
@@ -960,9 +960,7 @@ ThreeGppNTNUrbanChannelConditionModel::GetTypeId (void)
 
 ThreeGppNTNUrbanChannelConditionModel::ThreeGppNTNUrbanChannelConditionModel ()
   : ThreeGppChannelConditionModel ()
-{
-  NS_LOG_UNCOND("Dense Urban Prop Model Constructor");
-}
+{}
 
 ThreeGppNTNUrbanChannelConditionModel::~ThreeGppNTNUrbanChannelConditionModel ()
 {}
@@ -995,7 +993,7 @@ ThreeGppNTNUrbanChannelConditionModel::ComputePlos (Ptr<const MobilityModel> a,
     Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
     Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
 
-    if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+    if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
     {
       elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
     }
@@ -1036,9 +1034,7 @@ ThreeGppNTNSuburbanChannelConditionModel::GetTypeId (void)
 
 ThreeGppNTNSuburbanChannelConditionModel::ThreeGppNTNSuburbanChannelConditionModel ()
   : ThreeGppChannelConditionModel ()
-{
-  NS_LOG_UNCOND("Dense Urban Prop Model Constructor");
-}
+{}
 
 ThreeGppNTNSuburbanChannelConditionModel::~ThreeGppNTNSuburbanChannelConditionModel ()
 {}
@@ -1071,7 +1067,7 @@ ThreeGppNTNSuburbanChannelConditionModel::ComputePlos (Ptr<const MobilityModel> 
     Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
     Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
 
-    if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+    if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
     {
       elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
     }
@@ -1112,9 +1108,7 @@ ThreeGppNTNRuralChannelConditionModel::GetTypeId (void)
 
 ThreeGppNTNRuralChannelConditionModel::ThreeGppNTNRuralChannelConditionModel ()
   : ThreeGppChannelConditionModel ()
-{
-  NS_LOG_UNCOND("Dense Urban Prop Model Constructor");
-}
+{}
 
 ThreeGppNTNRuralChannelConditionModel::~ThreeGppNTNRuralChannelConditionModel ()
 {}
@@ -1147,7 +1141,7 @@ ThreeGppNTNRuralChannelConditionModel::ComputePlos (Ptr<const MobilityModel> a,
     Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
     Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
 
-    if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+    if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
     {
       elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
     }

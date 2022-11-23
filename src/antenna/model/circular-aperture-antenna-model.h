@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2011 CTTC
+ * Copyright (c) 2022 University of Padova, Dep. of Information Engineering, SIGNET lab.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -52,6 +52,20 @@ public:
   void SetOrientation(Angles a);
 
   /**
+   * \brief Set the antenna inclination using azimuth-inclination convention
+   * 
+   * \param theta the inclination angle of the antenna in rad
+   */
+  void SetInclination(double theta);
+
+  /**
+   * \brief Set the antenna inclination using azimuth-inclination convention
+   * 
+   * \param theta the azimuth angle of the antenna in rad
+   */
+  void SetAzimuth(double theta);
+
+  /**
    * \brief Set the antenna aperture radius
    * 
    * \param r the antenna radius in meters
@@ -63,7 +77,7 @@ public:
    * 
    * \param f the antenna operating freqyency, in Hz
    */
-  void SetOperatingFreqyency(double f);
+  void SetOperatingFrequency(double f);
 
   /**
    * \brief Set the antenna max gain
@@ -74,8 +88,10 @@ public:
 
   /**
    * \brief Get the gain in dB, using Bessel equation of first kind and first order.
+   * 
+   * \param a the position at wich the gain need to be calculated with respect to the antenna position
    */
-  virtual double GetGainDb (Angles a);
+  virtual double GetGainDb (Angles a) override;
 
 private:
 

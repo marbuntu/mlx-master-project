@@ -328,14 +328,6 @@ class ThreeGppRmaPropagationLossModel : public ThreeGppPropagationLossModel
     ThreeGppRmaPropagationLossModel(const ThreeGppRmaPropagationLossModel&) = delete;
     ThreeGppRmaPropagationLossModel& operator=(const ThreeGppRmaPropagationLossModel&) = delete;
 
-  /**
-   * \brief Copy constructor
-   *
-   * Defined and unimplemented to avoid misuse
-   * \returns the ThreeGppRmaPropagationLossModel instance
-   */
-  ThreeGppRmaPropagationLossModel & operator = (const ThreeGppRmaPropagationLossModel &) = delete;
-
 private:
   /**
    * \brief Computes the pathloss between a and b considering that the line of
@@ -651,6 +643,20 @@ private:
   double GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
 
   /**
+   * \brief Returns the minimum of the two independently generated distances
+   *        according to the uniform distribution between the minimum and the maximum
+   *        value depending on the specific 3GPP scenario (UMa, UMi-Street Canyon, RMa),
+   *        i.e., between 0 and 25 m for UMa and UMi-Street Canyon, and between 0 and 10 m
+   *        for RMa.
+   *        According to 3GPP TR 38.901 this 2D−in distance shall be UT-specifically
+   *        generated. 2D−in distance is used for the O2I penetration losses
+   *        calculation according to 3GPP TR 38.901 7.4.3.
+   *        See GetO2iLowPenetrationLoss/GetO2iHighPenetrationLoss functions.
+   * \return Returns 02i 2D distance (in meters) used to calculate low/high losses.
+   */
+  double GetO2iDistance2dIn() const override;
+
+  /**
    * \brief Computes the pathloss between a and b considering that the line of
    *        sight is obstructed
    * \param a tx mobility model
@@ -702,6 +708,13 @@ public:
    * Destructor
    */
   virtual ~ThreeGppNTNDenseUrbanPropagationLossModel () override;
+
+  /**
+     * \brief Implemented because declared as pure virtual on parents function.
+     * Does nothing on NTN scenarios.
+     * \return Nothing
+     */
+    double GetO2iDistance2dIn() const override;
 
   /**
    * \brief Copy constructor
@@ -782,6 +795,13 @@ public:
   virtual ~ThreeGppNTNUrbanPropagationLossModel () override;
 
   /**
+   * \brief Implemented because declared as pure virtual on parents function.
+   * Does nothing on NTN scenarios.
+   * \return Nothing
+   */
+  double GetO2iDistance2dIn() const override;
+
+  /**
    * \brief Copy constructor
    *
    * Defined and unimplemented to avoid misuse
@@ -860,6 +880,13 @@ public:
   virtual ~ThreeGppNTNSuburbanPropagationLossModel () override;
 
   /**
+   * \brief Implemented because declared as pure virtual on parents function.
+   * Does nothing on NTN scenarios.
+   * \return Nothing
+   */
+  double GetO2iDistance2dIn() const override;
+
+  /**
    * \brief Copy constructor
    *
    * Defined and unimplemented to avoid misuse
@@ -936,6 +963,13 @@ public:
    * Destructor
    */
   virtual ~ThreeGppNTNRuralPropagationLossModel () override;
+
+  /**
+   * \brief Implemented because declared as pure virtual on parents function.
+   * Does nothing on NTN scenarios.
+   * \return Nothing
+   */
+  double GetO2iDistance2dIn() const override;
 
   /**
    * \brief Copy constructor

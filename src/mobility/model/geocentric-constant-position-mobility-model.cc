@@ -70,33 +70,55 @@ GeocentricConstantPositionMobilityModel::GetElevationAngle(Ptr<const GeocentricC
   return DoGetElevationAngle(other);
 }
 
+void GeocentricConstantPositionMobilityModel::SetCoordinateTranslationReferencePoint (const Vector &position)
+{
+  DoSetCoordinateTranslationReferencePoint(position);
+}
+
+Vector 
+GeocentricConstantPositionMobilityModel::GetCoordinateTranslationReferencePoint(void) const
+{
+  return DoGetCoordinateTranslationReferencePoint();
+}
+
+Vector GeocentricConstantPositionMobilityModel::GetPosition (void) const
+{
+  return DoGetPosition();
+}
+
+void GeocentricConstantPositionMobilityModel::SetPosition (const Vector &position)
+{
+  return DoSetPosition(position);
+}
+
 /** 
  *  In order to for returned the position to work with the rest of ns-3,
  *  it is converted from geographic to topocentric using the GeograpicPositions method.
- *  The reference point for conversion is always lat=0, lon=0, altitude=0.
+ *  The default reference point for conversion is lat=0, lon=0, altitude=0.
  */
 Vector
 GeocentricConstantPositionMobilityModel::DoGetPosition (void) const
 {
   GeographicPositions gp;
-  Vector topographicCoordinates = gp.GeographicToTopocentricCoordinates(m_position,Vector3D(0,0,0),GeographicPositions::SPHERE);
+  Vector topographicCoordinates = gp.GeographicToTopocentricCoordinates(m_position,m_geographicReferencePoint,GeographicPositions::SPHERE);
   return topographicCoordinates;
 }
 
 void
 GeocentricConstantPositionMobilityModel::DoSetPosition (const Vector &position)
 {
-  m_position = position; //NEED CONVERSION FROM PLANAR CARTESIAN
+  NS_FATAL_ERROR("Legacy SetPosition has not been implemented for GeocentricConstantPostionMobiltyModel");
+  //NEED CONVERSION FROM PLANAR CARTESIAN
   NotifyCourseChange ();
 }
 
 double 
-GeocentricConstantPositionMobilityModel::DoGetDistanceFrom (Ptr<const GeocentricConstantPositionMobilityModel> position) const
+GeocentricConstantPositionMobilityModel::DoGetDistanceFrom (Ptr<const GeocentricConstantPositionMobilityModel> other) const
 {
   GeographicPositions gp;
-  Vector geographic_coord2 = position->DoGetGeocentricPosition();
+
   Vector cartesian_coord1 = gp.GeographicToCartesianCoordinates(m_position.x,m_position.y,m_position.z,gp.EarthSpheroidType::SPHERE);
-  Vector cartesian_coord2 = gp.GeographicToCartesianCoordinates(geographic_coord2.x,geographic_coord2.y,geographic_coord2.z,gp.EarthSpheroidType::SPHERE);
+  Vector cartesian_coord2 = other->DoGetGeocentricPosition();
 
   double distance = sqrt(pow(cartesian_coord1.x - cartesian_coord2.x,2) + pow(cartesian_coord1.y - cartesian_coord2.y,2) + pow(cartesian_coord1.z - cartesian_coord2.z,2));
 
@@ -112,6 +134,9 @@ GeocentricConstantPositionMobilityModel::DoGetGeographicPosition (void) const
 void
 GeocentricConstantPositionMobilityModel::DoSetGeographicPosition (const Vector &position)
 {
+  NS_ASSERT_MSG((m_position.x >= -90) && (m_position.x <= 90), "Latitude must be between -90 deg and +90 deg");
+  NS_ASSERT_MSG((m_position.y >= -180) && (m_position.y <= 180), "Longitude must be between -180 deg and +180 deg");
+  NS_ASSERT_MSG(m_position.z >= 0, "Altitude must be higher or equal 0 meters");
   m_position = position;
   NotifyCourseChange ();
 }
@@ -147,9 +172,32 @@ GeocentricConstantPositionMobilityModel::DoGetElevationAngle(Ptr<const Geocentri
   double numerator = abs(a.x*(b.x-a.x)+a.y*(b.y-a.y)+a.z*(b.z-a.z));
   double denominator = sqrt(pow(a.x, 2) + pow(a.y, 2) + pow(a.z, 2)) * sqrt(pow(b.x-a.x, 2) + pow(b.y-a.y, 2) + pow(b.z-a.z, 2));
 
-  elev_angle = abs((180.0 * M_1_PI) * asin(numerator/denominator)); //asin returns radiants, we convert to degrees
+  double x = numerator/denominator;
+
+  //This is done to avoid the nan returned by the asin function when numbers are "almost" 1, 
+  //for example 1.0000000000000002
+  if(x > 1)
+  {
+    x = 1;
+  }
+
+  elev_angle = abs((180.0 * M_1_PI) * asin(x)); //asin returns radiants, we convert to degrees
+
+  NS_ASSERT_MSG(!(isnan(elev_angle)), "asin returned a NaN value");
 
   return elev_angle;
+}
+
+void
+GeocentricConstantPositionMobilityModel::DoSetCoordinateTranslationReferencePoint(const Vector &refPoint)
+{
+  m_geographicReferencePoint = refPoint;
+}
+
+Vector
+GeocentricConstantPositionMobilityModel::DoGetCoordinateTranslationReferencePoint(void) const
+{
+  return m_geographicReferencePoint;
 }
 
 Vector

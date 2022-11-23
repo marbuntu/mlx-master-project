@@ -525,6 +525,7 @@ ThreeGppRmaPropagationLossModel::~ThreeGppRmaPropagationLossModel()
     NS_LOG_FUNCTION(this);
 }
 
+double
 ThreeGppRmaPropagationLossModel::GetO2iDistance2dIn() const
 {
     // distance2dIn is minimum of two independently generated uniformly distributed variables
@@ -1313,6 +1314,8 @@ ThreeGppIndoorOfficePropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<
 {
   NS_LOG_FUNCTION (this);
 
+    double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
+
     // check if the distance is outside the validity range
     if (distance3D < 1.0 || distance3D > 150.0)
     {
@@ -1520,10 +1523,16 @@ ThreeGppNTNDenseUrbanPropagationLossModel::~ThreeGppNTNDenseUrbanPropagationLoss
 }
 
 double
+ThreeGppNTNDenseUrbanPropagationLossModel::GetO2iDistance2dIn() const
+{
+    abort();
+}
+
+double
 ThreeGppNTNDenseUrbanPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
   NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 75.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
+  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
 
   double elev_angle = 0;
   double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
@@ -1537,7 +1546,7 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr
         Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
         Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
 
-        if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
         {
           elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
@@ -1557,33 +1566,21 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr
   //Check hBS and hUE?
   //Others checks?
 
-  Ptr<NormalRandomVariable> SF_NormRV = CreateObject<NormalRandomVariable>();  //The Shadow Fading is described by a Normal Random Variable of mean 0 and variance depending on the scenario
-
   // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
   double loss = 0;
-  loss = 32.45 + 20 * log10(m_frequency) + 20 * log10(distance3D); //Basic FSPL
-
-  //Apply Shadow Fading Loss
-  if(m_frequency<13.0e9)
-    {
-      loss += SF_NormRV->GetValue(0,(*m_SFCL_DenseUrban).at(elev_angle_quantized)[SFCL_params::S_LOS_sigF]); //Get the Shadow Fading for the S Band
-    }
-  else
-    {
-      loss += SF_NormRV->GetValue(0,(*m_SFCL_DenseUrban).at(elev_angle_quantized)[SFCL_params::Ka_LOS_sigF]); //Get the Shadow Fading for the Ka Band
-    }
+  loss = 32.45 + 20 * log10(m_frequency/1e9) + 20 * log10(distance3D); //Basic FSPL
 
   //Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
   if((elev_angle < 10 && m_frequency>1e9)  || m_frequency>=10e9) 
   {
     int m_rounded_frequency = round(m_frequency/10e8);
-    loss += atmosphericAbsorption[m_rounded_frequency];
+    loss += atmosphericAbsorption[m_rounded_frequency]/sin(elev_angle*(M_PI/180));
   }
 
   //Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
   if(m_frequency<6e9)
   {
-    loss += 6.22/(pow(m_frequency,1.5));
+    loss += 6.22/(pow(m_frequency/1e9,1.5));
   }
 
   //Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
@@ -1600,7 +1597,7 @@ double
 ThreeGppNTNDenseUrbanPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
   NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 75.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
+  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
 
   double elev_angle = 0;
   double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
@@ -1614,7 +1611,7 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Pt
         Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
         Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
 
-        if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
         {
           elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
@@ -1631,35 +1628,31 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Pt
   int elev_angle_quantized = (elev_angle<10) ? 10 : round(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90..
   NS_ASSERT_MSG ((elev_angle_quantized >= 10)&&(elev_angle_quantized <=90), "Invalid elevation angle!");
 
-  NormalRandomVariable SF_N;  //The Shadow Fading is described by a Normal Random Variable of mean 0 and variance depending on the scenario
-
   // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
   double loss = 0;
-  loss = 32.45 + 20 * log10(m_frequency) + 20 * log10(distance3D); //Basic FSPL
+  loss = 32.45 + 20 * log10(m_frequency/1e9) + 20 * log10(distance3D); //Basic FSPL
 
-  //Apply Shadow Fading and Clutter Loss
+  //Apply Clutter Loss
   if(m_frequency<13.0e9)
     {
-      loss += SF_N.GetValue(0,(*m_SFCL_DenseUrban).at(elev_angle_quantized)[SFCL_params::S_NLOS_sigF]); //Get the Shadow Fading for the S Band
-      loss += SF_N.GetValue(0,(*m_SFCL_DenseUrban).at(elev_angle_quantized)[SFCL_params::S_NLOS_CL]); //Get the Clutter Loss for the S Band
+      loss += (*m_SFCL_DenseUrban).at(elev_angle_quantized)[SFCL_params::S_NLOS_CL]; //Get the Clutter Loss for the S Band
     }
   else
     {
-      loss += SF_N.GetValue(0,(*m_SFCL_DenseUrban).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_sigF]); //Get the Shadow Fading for the Ka Band
-      loss += SF_N.GetValue(0,(*m_SFCL_DenseUrban).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_CL]); //Get the Clutter Loss for the Ka Band
+      loss += (*m_SFCL_DenseUrban).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_CL]; //Get the Clutter Loss for the Ka Band
     }
 
   //Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
   if((elev_angle < 10 && m_frequency>1e9)  || m_frequency>=10e9) 
   {
     int m_rounded_frequency = round(m_frequency/10e8);
-    loss += atmosphericAbsorption[m_rounded_frequency];
+    loss += atmosphericAbsorption[m_rounded_frequency]/sin(elev_angle*(M_PI/180));
   }
 
   //Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
   if(m_frequency<6e9)
   {
-    loss += 6.22/(pow(m_frequency,1.5));
+    loss += 6.22/(pow(m_frequency/1e9,1.5));
   }
 
   //Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
@@ -1690,7 +1683,7 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetShadowingStd (Ptr<MobilityModel> a
         Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
         Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
 
-        if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
         {
           elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
@@ -1787,10 +1780,16 @@ ThreeGppNTNUrbanPropagationLossModel::~ThreeGppNTNUrbanPropagationLossModel ()
 }
 
 double
+ThreeGppNTNUrbanPropagationLossModel::GetO2iDistance2dIn() const
+{
+    abort();
+}
+
+double
 ThreeGppNTNUrbanPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
   NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 75.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
+  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
 
   double elev_angle = 0;
   double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
@@ -1804,7 +1803,7 @@ ThreeGppNTNUrbanPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<Mobi
         Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
         Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
 
-        if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
         {
           elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
@@ -1824,33 +1823,21 @@ ThreeGppNTNUrbanPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<Mobi
   //Check hBS and hUE?
   //Others checks?
 
-  Ptr<NormalRandomVariable> SF_NormRV = CreateObject<NormalRandomVariable>();  //The Shadow Fading is described by a Normal Random Variable of mean 0 and variance depending on the scenario
-
   // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
   double loss = 0;
-  loss = 32.45 + 20 * log10(m_frequency) + 20 * log10(distance3D); //Basic FSPL
-
-  //Apply Shadow Fading Loss
-  if(m_frequency<13.0e9)
-    {
-      loss += SF_NormRV->GetValue(0,(*m_SFCL_Urban).at(elev_angle_quantized)[SFCL_params::S_LOS_sigF]); //Get the Shadow Fading for the S Band
-    }
-  else
-    {
-      loss += SF_NormRV->GetValue(0,(*m_SFCL_Urban).at(elev_angle_quantized)[SFCL_params::Ka_LOS_sigF]); //Get the Shadow Fading for the Ka Band
-    }
+  loss = 32.45 + 20 * log10(m_frequency/1e9) + 20 * log10(distance3D); //Basic FSPL
 
   //Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
   if((elev_angle < 10 && m_frequency>1e9)  || m_frequency>=10e9) 
   {
     int m_rounded_frequency = round(m_frequency/10e8);
-    loss += atmosphericAbsorption[m_rounded_frequency];
+    loss += atmosphericAbsorption[m_rounded_frequency]/sin(elev_angle*(M_PI/180));
   }
 
   //Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
   if(m_frequency<6e9)
   {
-    loss += 6.22/(pow(m_frequency,1.5));
+    loss += 6.22/(pow(m_frequency/1e9,1.5));
   }
 
   //Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
@@ -1867,7 +1854,7 @@ double
 ThreeGppNTNUrbanPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
   NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 75.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
+  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
   double elev_angle = 0;
   double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
 
@@ -1880,7 +1867,7 @@ ThreeGppNTNUrbanPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<Mob
         Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
         Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
 
-        if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
         {
           elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
@@ -1900,35 +1887,31 @@ ThreeGppNTNUrbanPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<Mob
   //Check hBS and hUE?
   //Others checks?
 
-  NormalRandomVariable SF_N;  //The Shadow Fading is described by a Normal Random Variable of mean 0 and variance depending on the scenario
-
   // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
   double loss = 0;
-  loss = 32.45 + 20 * log10(m_frequency) + 20 * log10(distance3D); //Basic FSPL
+  loss = 32.45 + 20 * log10(m_frequency/1e9) + 20 * log10(distance3D); //Basic FSPL
 
-  //Apply Shadow Fading and Clutter Loss
+  //Apply Clutter Loss
   if(m_frequency<13.0e9)
     {
-      loss += SF_N.GetValue(0,(*m_SFCL_Urban).at(elev_angle_quantized)[SFCL_params::S_NLOS_sigF]); //Get the Shadow Fading for the S Band
-      loss += SF_N.GetValue(0,(*m_SFCL_Urban).at(elev_angle_quantized)[SFCL_params::S_NLOS_CL]); //Get the Clutter Loss for the S Band
+      loss += (*m_SFCL_Urban).at(elev_angle_quantized)[SFCL_params::S_NLOS_CL]; //Get the Clutter Loss for the S Band
     }
   else
     {
-      loss += SF_N.GetValue(0,(*m_SFCL_Urban).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_sigF]); //Get the Shadow Fading for the Ka Band
-      loss += SF_N.GetValue(0,(*m_SFCL_Urban).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_CL]); //Get the Clutter Loss for the Ka Band
+      loss += (*m_SFCL_Urban).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_CL]; //Get the Clutter Loss for the Ka Band
     }
 
   //Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
   if((elev_angle < 10 && m_frequency>1e9)  || m_frequency>=10e9) 
   {
     int m_rounded_frequency = round(m_frequency/10e8);
-    loss += atmosphericAbsorption[m_rounded_frequency];
+    loss += atmosphericAbsorption[m_rounded_frequency]/sin(elev_angle*(M_PI/180));
   }
 
   //Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
   if(m_frequency<6e9)
   {
-    loss += 6.22/(pow(m_frequency,1.5));
+    loss += 6.22/(pow(m_frequency/1e9,1.5));
   }
 
   //Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
@@ -1960,7 +1943,7 @@ ThreeGppNTNUrbanPropagationLossModel::GetShadowingStd (Ptr<MobilityModel> a, Ptr
         Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
         Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
 
-        if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
         {
           elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
@@ -2057,10 +2040,16 @@ ThreeGppNTNSuburbanPropagationLossModel::~ThreeGppNTNSuburbanPropagationLossMode
 }
 
 double
+ThreeGppNTNSuburbanPropagationLossModel::GetO2iDistance2dIn() const
+{
+    abort();
+}
+
+double
 ThreeGppNTNSuburbanPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
   NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 75.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
+  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
 
   double elev_angle = 0;
   double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
@@ -2074,7 +2063,7 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<M
         Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
         Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
 
-        if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
         {
           elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
@@ -2094,33 +2083,21 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<M
   //Check hBS and hUE?
   //Others checks?
 
-  Ptr<NormalRandomVariable> SF_NormRV = CreateObject<NormalRandomVariable>();  //The Shadow Fading is described by a Normal Random Variable of mean 0 and variance depending on the scenario
-
   // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
   double loss = 0;
-  loss = 32.45 + 20 * log10(m_frequency) + 20 * log10(distance3D); //Basic FSPL
-
-  //Apply Shadow Fading Loss
-  if(m_frequency<13.0e9)
-    {
-      loss += SF_NormRV->GetValue(0,(*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::S_LOS_sigF]); //Get the Shadow Fading for the S Band
-    }
-  else
-    {
-      loss += SF_NormRV->GetValue(0,(*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::Ka_LOS_sigF]); //Get the Shadow Fading for the Ka Band
-    }
+  loss = 32.45 + 20 * log10(m_frequency/1e9) + 20 * log10(distance3D); //Basic FSPL
 
   //Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
   if((elev_angle < 10 && m_frequency>1e9)  || m_frequency>=10e9) 
   {
     int m_rounded_frequency = round(m_frequency/10e8);
-    loss += atmosphericAbsorption[m_rounded_frequency];
+    loss += atmosphericAbsorption[m_rounded_frequency]/sin(elev_angle*(M_PI/180));
   }
 
   //Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
   if(m_frequency<6e9)
   {
-    loss += 6.22/(pow(m_frequency,1.5));
+    loss += 6.22/(pow(m_frequency/1e9,1.5));
   }
 
   //Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
@@ -2130,6 +2107,7 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<M
   }
 
   NS_LOG_DEBUG ("Loss " << loss);
+
   return loss;
 }
 
@@ -2137,7 +2115,7 @@ double
 ThreeGppNTNSuburbanPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
   NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 75.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
+  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
   double elev_angle = 0;
   double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
 
@@ -2150,7 +2128,7 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<
         Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
         Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
 
-        if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
         {
           elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
@@ -2170,35 +2148,31 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<
   //Check hBS and hUE?
   //Others checks?
 
-  NormalRandomVariable SF_N;  //The Shadow Fading is described by a Normal Random Variable of mean 0 and variance depending on the scenario
-
   // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
   double loss = 0;
-  loss = 32.45 + 20 * log10(m_frequency) + 20 * log10(distance3D); //Basic FSPL
+  loss = 32.45 + 20 * log10(m_frequency/1e9) + 20 * log10(distance3D); //Basic FSPL
 
-  //Apply Shadow Fading and Clutter Loss
+  //Apply Clutter Loss
   if(m_frequency<13.0e9)
     {
-      loss += SF_N.GetValue(0,(*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::S_NLOS_sigF]); //Get the Shadow Fading for the S Band
-      loss += SF_N.GetValue(0,(*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::S_NLOS_CL]); //Get the Clutter Loss for the S Band
+      loss += (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::S_NLOS_CL]; //Get the Clutter Loss for the S Band
     }
   else
     {
-      loss += SF_N.GetValue(0,(*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_sigF]); //Get the Shadow Fading for the Ka Band
-      loss += SF_N.GetValue(0,(*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_CL]); //Get the Clutter Loss for the Ka Band
+      loss += (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_CL]; //Get the Clutter Loss for the Ka Band
     }
 
   //Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
   if((elev_angle < 10 && m_frequency>1e9)  || m_frequency>=10e9) 
   {
     int m_rounded_frequency = round(m_frequency/10e8);
-    loss += atmosphericAbsorption[m_rounded_frequency];
+    loss += atmosphericAbsorption[m_rounded_frequency]/sin(elev_angle*(M_PI/180));
   }
 
   //Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
   if(m_frequency<6e9)
   {
-    loss += 6.22/(pow(m_frequency,1.5));
+    loss += 6.22/(pow(m_frequency/1e9,1.5));
   }
 
   //Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
@@ -2230,7 +2204,7 @@ ThreeGppNTNSuburbanPropagationLossModel::GetShadowingStd (Ptr<MobilityModel> a, 
         Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
         Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
 
-        if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
         {
           elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
@@ -2327,10 +2301,16 @@ ThreeGppNTNRuralPropagationLossModel::~ThreeGppNTNRuralPropagationLossModel ()
 }
 
 double
+ThreeGppNTNRuralPropagationLossModel::GetO2iDistance2dIn() const
+{
+    abort();
+}
+
+double
 ThreeGppNTNRuralPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
   NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 75.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
+  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
 
   double elev_angle = 0;
   double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
@@ -2344,7 +2324,7 @@ ThreeGppNTNRuralPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<Mobi
         Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
         Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
 
-        if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
         {
           elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
@@ -2357,6 +2337,8 @@ ThreeGppNTNRuralPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<Mobi
     {
       NS_FATAL_ERROR ("Mobility Models needs to be of type Geocentric for NTN scenarios");
     }
+  
+  NS_LOG_UNCOND("Elevation Angle: "<< elev_angle);
 
   int elev_angle_quantized = (elev_angle<10) ? 10 : round(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90..
   NS_ASSERT_MSG ((elev_angle_quantized >= 10)&&(elev_angle_quantized <=90), "Invalid elevation angle!");
@@ -2364,33 +2346,21 @@ ThreeGppNTNRuralPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<Mobi
   //Check hBS and hUE?
   //Others checks?
 
-  Ptr<NormalRandomVariable> SF_NormRV = CreateObject<NormalRandomVariable>();  //The Shadow Fading is described by a Normal Random Variable of mean 0 and variance depending on the scenario
-
   // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
   double loss = 0;
-  loss = 32.45 + 20 * log10(m_frequency) + 20 * log10(distance3D); //Basic FSPL
-
-  //Apply Shadow Fading Loss
-  if(m_frequency<13.0e9)
-    {
-      loss += SF_NormRV->GetValue(0,(*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::S_LOS_sigF]); //Get the Shadow Fading for the S Band
-    }
-  else
-    {
-      loss += SF_NormRV->GetValue(0,(*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::Ka_LOS_sigF]); //Get the Shadow Fading for the Ka Band
-    }
+  loss = 32.45 + 20 * log10(m_frequency/1e9) + 20 * log10(distance3D); //Basic FSPL
 
   //Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
   if((elev_angle < 10 && m_frequency>1e9)  || m_frequency>=10e9) 
   {
     int m_rounded_frequency = round(m_frequency/10e8);
-    loss += atmosphericAbsorption[m_rounded_frequency];
+    loss += atmosphericAbsorption[m_rounded_frequency]/sin(elev_angle*(M_PI/180));
   }
 
   //Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
   if(m_frequency<6e9)
   {
-    loss += 6.22/(pow(m_frequency,1.5));
+    loss += 6.22/(pow(m_frequency/1e9,1.5));
   }
 
   //Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
@@ -2407,7 +2377,7 @@ double
 ThreeGppNTNRuralPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
   NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 75.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
+  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
   double elev_angle = 0;
   double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
 
@@ -2420,7 +2390,7 @@ ThreeGppNTNRuralPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<Mob
         Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
         Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
 
-        if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
         {
           elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
@@ -2440,35 +2410,31 @@ ThreeGppNTNRuralPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<Mob
   //Check hBS and hUE?
   //Others checks?
 
-  NormalRandomVariable SF_N;  //The Shadow Fading is described by a Normal Random Variable of mean 0 and variance depending on the scenario
-
   // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
   double loss = 0;
-  loss = 32.45 + 20 * log10(m_frequency) + 20 * log10(distance3D); //Basic FSPL
+  loss = 32.45 + 20 * log10(m_frequency/1e9) + 20 * log10(distance3D); //Basic FSPL
 
-  //Apply Shadow Fading and Clutter Loss
+  //Apply Clutter Loss
   if(m_frequency<13.0e9)
     {
-      loss += SF_N.GetValue(0,(*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::S_NLOS_sigF]); //Get the Shadow Fading for the S Band
-      loss += SF_N.GetValue(0,(*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::S_NLOS_CL]); //Get the Clutter Loss for the S Band
+      loss += (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::S_NLOS_CL]; //Get the Clutter Loss for the S Band
     }
   else
     {
-      loss += SF_N.GetValue(0,(*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_sigF]); //Get the Shadow Fading for the Ka Band
-      loss += SF_N.GetValue(0,(*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_CL]); //Get the Clutter Loss for the Ka Band
+      loss += (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_CL]; //Get the Clutter Loss for the Ka Band
     }
 
   //Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
   if((elev_angle < 10 && m_frequency>1e9)  || m_frequency>=10e9) 
   {
     int m_rounded_frequency = round(m_frequency/10e8);
-    loss += atmosphericAbsorption[m_rounded_frequency];
+    loss += atmosphericAbsorption[m_rounded_frequency]/sin(elev_angle*(M_PI/180));
   }
 
   //Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
   if(m_frequency<6e9)
   {
-    loss += 6.22/(pow(m_frequency,1.5));
+    loss += 6.22/(pow(m_frequency/1e9,1.5));
   }
 
   //Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
@@ -2500,7 +2466,7 @@ ThreeGppNTNRuralPropagationLossModel::GetShadowingStd (Ptr<MobilityModel> a, Ptr
         Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
         Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
 
-        if(a->GetPosition().z < b->GetPosition().z) //b is the HAPS/Satellite
+        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
         {
           elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
