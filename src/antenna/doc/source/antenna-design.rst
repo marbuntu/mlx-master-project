@@ -175,6 +175,26 @@ and "AntennaVerticalSpacing".
 The polarization of each antenna element in the array is determined by the polarization
 slant angle through the attribute "PolSlantAngle", as described in [38901]_ (i.e., :math:`{\zeta}`).
 
+CircularApertureAntennaModel
++++++++++++++++++++++
+
+This class CircularApertureAntennaModel is a generic implementation of the antenna model presented in [38811]_.
+The model represents parabolic antennas, typically deployed for long range communications, e.g. satellite links.
+This implementation does not adopt any type of approximation for the field pattern, taking benefit from the Bessel functions directly implemented into C++.
+By default the orientation is the same as the z-axis, facing the sky (z-axis positive direction), but can be changed using the AntennaInclination and AntennaAzimuth parameters.
+The antenna gain in decimal scale is determined using:
+
+.. math:: 
+   G \cdot 4\left | \frac{J_{1}\left ( k\cdot a\cdot sin\theta \right )}{k\cdot a\cdot sin\theta} \right |^{2}\;\;\;\;\; for\; 0<\left | \theta \right |\leq 90^{\circ} \\
+   G \cdot 1\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; for\; \theta=0
+
+Where :math:`J_{1}()` is the Bessel function of the first kind and first order, :math:`G` is the linear gain value, :math:`a` is the radius of the antenna's circular aperture, 
+and given a frequency of operation :math:`f` the value :math:`k` is equal to :math:`k=\frac{2\pi f}{x}`, 
+with :math:`c` the speed of light in vacuum. This type of antennas feature a symmetric radiation patter, meaning that only one angle is enough to calculate the radiation strength in a certain direction, 
+since only the angle :math:`\theta` from the bore sight is needed.
+The parameters :math:`G` (in decibel scale), :math:`a` and :math:`f` can be configured using the attributes: "AntennaMaxGainDb", "AntennaCircularApertureRadius" and "OperatingFrequency".
+
+
 
 .. [Balanis] C.A. Balanis, "Antenna Theory - Analysis and Design",  Wiley, 2nd Ed.
 
@@ -190,5 +210,7 @@ slant angle through the attribute "PolSlantAngle", as described in [38901]_ (i.e
    assumptions and parameters for FDD HeNB RF requirements.
 
 .. [38901] 3GPP. 2018. TR 38.901, Study on channel model for frequencies from 0.5 to 100 GHz, V15.0.0. (2018-06).
+
+.. [38811] 3GPP. 2018. TR 38.811, Study on New Radio (NR) to support non-terrestrial networks, V15.4.0. (2020-09).
 
 .. [Mailloux] Robert J. Mailloux, "Phased Array Antenna Handbook", Artech House, 2nd Ed.

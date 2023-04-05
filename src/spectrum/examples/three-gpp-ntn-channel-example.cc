@@ -1,6 +1,5 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2019 SIGNET Lab, Department of Information Engineering,
+ * Copyright (c) 2023 SIGNET Lab, Department of Information Engineering,
  * University of Padova
  *
  * This program is free software; you can redistribute it and/or modify
@@ -15,6 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+/**
+ * This example is a modified version of "three-gpp-channel-example", to include
+ * the 3GPP NTN channel model.
+ * The preconfigured parameters are the one provided by 3GPP in TR 38.821,
+ * more specifically scenario 10 in down-link mode.
+ * Two static nodes, one on the ground and one in orbit, communicates using
+ * circular aperture antennas. The carrier frequency is set at 20GHz with 400MHz bandwidth.
+ * The result is the SNR of the signal and the pathloss, saved in the ntn-snr-trace.txt file.
  */
 
 #include "ns3/core-module.h"
@@ -261,8 +270,10 @@ main (int argc, char *argv[])
   uint32_t timeRes = 10; // time resolution in milliseconds
 
   //SCENARIO 10 DL of TR 38.321
+  //This parameters can be set accordingly to 3GPP TR 38.821 or arbitrarily modified
 
   std::string scenario = "NTN-Suburban"; // 3GPP propagation scenario
+  //All available NTN scenarios: DenseUrban, Urban, Suburban, Rural.
 
   double frequency = 20e9; // operating frequency in Hz
   double bandwidth = 400e6;  // Hz
@@ -281,7 +292,7 @@ main (int argc, char *argv[])
   //Calculate transmission power in dBm using EIRPDensity + 10*log10(Bandwidth) - AntennaGain + 30
   double txPow = (satEIRPDensity + 10 * log10( bandwidth/1e6 ) - satAntennaGain) + 30;
 
-  NS_LOG_UNCOND("Transmitting power: " << txPow << "dBm, (" << pow(10. , (txPow-30)/10) <<"W)");
+  NS_LOG_DEBUG ("Transmitting power: " << txPow << "dBm, (" << pow(10. , (txPow-30)/10) <<"W)");
 
   Config::SetDefault ("ns3::ThreeGppChannelModel::UpdatePeriod", TimeValue(MilliSeconds (1))); // update the channel at each iteration
   Config::SetDefault ("ns3::ThreeGppChannelConditionModel::UpdatePeriod", TimeValue(MilliSeconds (0.0))); // do not update the channel condition
@@ -353,16 +364,15 @@ main (int argc, char *argv[])
   Ptr<GeocentricConstantPositionMobilityModel> txMob = CreateObject<GeocentricConstantPositionMobilityModel> ();
   Ptr<GeocentricConstantPositionMobilityModel> rxMob = CreateObject<GeocentricConstantPositionMobilityModel> ();
 
-  txMob->SetGeographicPosition (Vector (45.40869, 11.89448, 35786000)); //GEO over DEI
-
-  rxMob->SetGeographicPosition (Vector (45.40869, 11.89448, 14.0)); //DEI Coordinates  
+  txMob->SetGeographicPosition (Vector (45.40869, 11.89448, 35786000)); //GEO over Padova
+  rxMob->SetGeographicPosition (Vector (45.40869, 11.89448, 14.0)); //Padova Coordinates  
 
   //This is not striclty necessary, but is useful to have "sensible" values when using GetPosition()
-  txMob->SetCoordinateTranslationReferencePoint(Vector(45.40869, 11.89448, 0.0));  //DEI Coordinates without altitute
-  rxMob->SetCoordinateTranslationReferencePoint(Vector(45.40869, 11.89448, 0.0));  //DEI Coordinates without altitute
+  txMob->SetCoordinateTranslationReferencePoint(Vector(45.40869, 11.89448, 0.0));  //Padova Coordinates without altitute
+  rxMob->SetCoordinateTranslationReferencePoint(Vector(45.40869, 11.89448, 0.0));  //Padova Coordinates without altitute
 
-  NS_LOG_UNCOND("TX Position: "<< txMob->GetPosition());
-  NS_LOG_UNCOND("RX Position: "<< rxMob->GetPosition());
+  NS_LOG_DEBUG("TX Position: "<< txMob->GetPosition());
+  NS_LOG_DEBUG("RX Position: "<< rxMob->GetPosition());
   
   // assign the mobility models to the nodes
   nodes.Get (0)->AggregateObject (txMob);
