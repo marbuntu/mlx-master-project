@@ -42,6 +42,10 @@ The following propagation loss models are implemented:
       * ThreeGppUMaPropagationLossModel
       * ThreeGppUmiStreetCanyonPropagationLossModel
       * ThreeGppIndoorOfficePropagationLossModel
+      * ThreeGppNTNDenseUrbanPropagationLossModel
+      * ThreeGppNTNUrbanPropagationLossModel
+      * ThreeGppNTNSuburbanPropagationLossModel
+      * ThreeGppNTNRuralPropagationLossModel
 
 Other models could be available thanks to other modules, e.g., the ``building`` module.
 
@@ -746,6 +750,47 @@ The test cases :cpp:class:`ThreeGppRmaPropagationLossModelTestCase`,
 :cpp:class:`ThreeGppIndoorOfficePropagationLossModelTestCase` compute the path loss between two nodes and compares it with the value obtained using the formulas in 3GPP TR 38.901 [38901]_, Table 7.4.1-1.
 The test case :cpp:class:`ThreeGppShadowingTestCase` checks if the shadowing is correctly computed by testing the deviation of the overall propagation loss from the path loss. The test is carried out for all the scenarios, both in LOS and NLOS condition.
 
+ThreeGppNTNPropagationLossModel
+============================
+
+Four different classes have been derived from the base class :cpp:class:`ThreeGppPropagationLossModel`
+to support Non-Terrestrial Networks, one for each scenario presented in 3GPP TR 38.811 [38811]_, i.e.,
+dense urban, urban, suburban and rural.
+
+*Implemented features:*
+
+  * Line of Sight and Not Line of Sight (LOS/NLOS) probability models (3GPP TR 38.811, Sec. 6.6.1)
+  * Path loss, shadowing models and clutter loss (3GPP TR 38.811, Sec. 6.6.2)
+  * Atmospheric absorption model (3GPP TR 38.811, Sec. 6.6.4)
+  * Ionospheric and tropospheric scintillation (3GPP TR 38.811, Sec. 6.6.6)
+  * All the features already implemented in `ThreeGppPropagationLossModel <index.html#threegpppropagationlossmodel>`_
+
+
+ThreeGppNTNDenseUrbanPropagationLossModel
+`````````````````````````````````````````
+This implements the LOS/NLOS path loss and shadow fading models described in 3GPP
+TR 38.811 [38811]_, Table 6.6.2-1 for the Dense Urban scenario. It
+supports frequencies between 0.5 and 100 GHz.
+
+ThreeGppNTNUrbanPropagationLossModel
+````````````````````````````````````
+This implements the LOS/NLOS path loss and shadow fading models described in 3GPP
+TR 38.811 [38811]_, Table 6.6.2-2 for the Urban scenario. It
+supports frequencies between 0.5 and 100 GHz.
+
+ThreeGppNTNSuburbanPropagationLossModel
+```````````````````````````````````````
+This implements the LOS/NLOS path loss and shadow fading models described in 3GPP
+TR 38.811 [38811]_, Table 6.6.2-3 for the Suburban scenario. It
+supports frequencies between 0.5 and 100 GHz.
+
+ThreeGppNTNRuralPropagationLossModel
+````````````````````````````````````
+This implements the LOS/NLOS path loss and shadow fading models described in 3GPP
+TR 38.811 [38811]_, Table 6.6.2-3 for the Rural scenario. It
+supports frequencies between 0.5 and 100 GHz.
+
+
 ChannelConditionModel
 *********************
 
@@ -802,6 +847,36 @@ This implements the statistical channel condition model described in 3GPP TR 38.
 ThreeGppIndoorOpenOfficeChannelConditionModel
 `````````````````````````````````````````````
 This implements the statistical channel condition model described in 3GPP TR 38.901 [38901]_, Table 7.4.2-1, for the Indoor-Open office scenario.
+
+ThreeGppNTNChannelConditionModel
+================================
+This is the base class for the 3GPP NTN channel condition models.
+It provides the possibility to updated the condition of each channel periodically,
+after a given time period which can be configured through the attribute "UpdatePeriod".
+If "UpdatePeriod" is set to 0, the channel condition is never updated.
+It has four derived classes implementing the channel condition models described in 3GPP TR 38.811 [38811]_ 
+for different propagation scenarios.
+
+ThreeGppDenseUrbanChannelConditionModel
+```````````````````````````````````````
+This implements the statistical channel condition model described in 3GPP TR 38.811 [38811]_, 
+Table 6.6.1-1, for the Dense Urban scenario.
+
+ThreeGppUrbanChannelConditionModel
+``````````````````````````````````
+This implements the statistical channel condition model described in 3GPP TR 38.811 [38811]_, 
+Table 6.6.1-1, for the Urban scenario.
+
+ThreeGppSuburbanStreetCanyonChannelConditionModel
+`````````````````````````````````````````````````
+This implements the statistical channel condition model described in 3GPP TR 38.811 [38811]_, 
+Table 6.6.1-1, for the Suburban scenario.
+
+ThreeGppRuralChannelConditionModel
+``````````````````````````````````
+This implements the statistical channel condition model described in 3GPP TR 38.811 [38811]_, 
+Table 6.6.1-1, for the Rural office scenario.
+
 
 Testing
 =======
@@ -1036,3 +1111,5 @@ References
 .. [Boban2016Modeling]  M. Boban,  X. Gong, and  W. Xu, “Modeling the evolution
    of line-of-sight blockage for V2V channels,” in IEEE 84th Vehicular Technology
    Conference (VTC-Fall), 2016.
+
+.. [38811] 3GPP. 2018. TR 38.811, Study on New Radio (NR) to support non-terrestrial networks, V15.4.0. (2020-09).

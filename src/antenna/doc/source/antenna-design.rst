@@ -176,7 +176,7 @@ The polarization of each antenna element in the array is determined by the polar
 slant angle through the attribute "PolSlantAngle", as described in [38901]_ (i.e., :math:`{\zeta}`).
 
 CircularApertureAntennaModel
-+++++++++++++++++++++
+++++++++++++++++++++++++++++
 
 This class CircularApertureAntennaModel is a generic implementation of the antenna model presented in [38811]_.
 The model represents parabolic antennas, typically deployed for long range communications, e.g. satellite links.

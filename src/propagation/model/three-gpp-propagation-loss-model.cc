@@ -1532,7 +1532,7 @@ double
 ThreeGppNTNDenseUrbanPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
   NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
+  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
 
   double elev_angle = 0;
   double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
@@ -1597,7 +1597,7 @@ double
 ThreeGppNTNDenseUrbanPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
   NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
+  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
 
   double elev_angle = 0;
   double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
@@ -1789,7 +1789,7 @@ double
 ThreeGppNTNUrbanPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
   NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
+  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
 
   double elev_angle = 0;
   double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
@@ -1854,7 +1854,7 @@ double
 ThreeGppNTNUrbanPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
   NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
+  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
   double elev_angle = 0;
   double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
 
@@ -2049,7 +2049,7 @@ double
 ThreeGppNTNSuburbanPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
   NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
+  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
 
   double elev_angle = 0;
   double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
@@ -2115,7 +2115,7 @@ double
 ThreeGppNTNSuburbanPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
   NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
+  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
   double elev_angle = 0;
   double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
 
@@ -2310,7 +2310,7 @@ double
 ThreeGppNTNRuralPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
   NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
+  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
 
   double elev_angle = 0;
   double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
@@ -2377,7 +2377,7 @@ double
 ThreeGppNTNRuralPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
   NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 75 GHz.");
+  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
   double elev_angle = 0;
   double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
 

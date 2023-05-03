@@ -52,26 +52,11 @@ Coordinate system
 #################
 
 There are many possible coordinate systems and possible translations between
-them.  |ns3| uses the Cartesian coordinate system only, at present.
-
-The question has arisen as to how to use the mobility models (supporting
-Cartesian coordinates) with different coordinate systems.  This is possible
-if the user performs conversion between the |ns3| Cartesian and the
-other coordinate system.  One possible library to assist is
-the `proj4 <https://proj.org>`_ library for projections and reverse
-projections.
-
-If we support converting between coordinate systems, we must adopt a
-reference.  It has been suggested to use the geocentric Cartesian coordinate
-system as a reference.  Contributions are welcome in this regard.
-
-The question has arisen about adding a new mobility model whose motion
-is natively implemented in a different coordinate system (such as an
-orbital mobility model implemented using spherical coordinate system).
-We advise to create a subclass with the APIs desired
-(such as Get/SetSphericalPosition), and new position allocators, and
-implement the motion however desired, but must also support the conversion to
-cartesian (by supporting the cartesian Get/SetPosition).
+them.  |ns3| uses the Cartesian coordinate system and the geocentric Cartesian coordinate system, at the moment.
+The GeocentricConstantPositionMobilityModel adopts the geocentric Cartesian coordinates, while still implementing the Get/SetPosition methods, 
+which using the GeographicPosition class offers conversion to and form Cartesian coordinates. 
+Furthermore, the user can set the position of a node by the means of geographical coordinates thanks to the methods
+Get/SetGeographicPosition.
 
 Coordinates
 ###########
@@ -112,6 +97,7 @@ MobilityModel Subclasses
 - RandomWaypoint
 - SteadyStateRandomWaypoint
 - Waypoint
+- GeocentricConstantPosition
 
 PositionAllocator
 #################
