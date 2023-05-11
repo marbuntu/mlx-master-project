@@ -94,7 +94,7 @@ void GeocentricConstantPositionMobilityModel::SetPosition (const Vector &positio
 /** 
  *  In order to for returned the position to work with the rest of ns-3,
  *  it is converted from geographic to topocentric using the GeograpicPositions method.
- *  The default reference point for conversion is lat=0, lon=0, altitude=0.
+ *  The default reference point for conversion is lat=0, lon=0, altitude=0, but can be changed.
  */
 Vector
 GeocentricConstantPositionMobilityModel::DoGetPosition (void) const
@@ -107,8 +107,9 @@ GeocentricConstantPositionMobilityModel::DoGetPosition (void) const
 void
 GeocentricConstantPositionMobilityModel::DoSetPosition (const Vector &position)
 {
-  NS_FATAL_ERROR("Legacy SetPosition has not been implemented for GeocentricConstantPostionMobiltyModel");
-  //NEED CONVERSION FROM PLANAR CARTESIAN
+  GeographicPositions gp;
+  Vector geographicCoordinates = gp.TopocentricToGeographicCoordinates(position,m_geographicReferencePoint,GeographicPositions::SPHERE);
+  m_position = geographicCoordinates;
   NotifyCourseChange ();
 }
 
@@ -153,8 +154,8 @@ void
 GeocentricConstantPositionMobilityModel::DoSetGeocentricPosition (const Vector &position)
 {
   GeographicPositions gp;
-  Vector cartesian_coord = gp.CartesianToGeographicCoordinates(position,gp.SPHERE);
-  m_position = cartesian_coord;
+  Vector geographic_coord = gp.CartesianToGeographicCoordinates(position,gp.SPHERE);
+  m_position = geographic_coord;
   NotifyCourseChange ();
 }
 
