@@ -66,11 +66,11 @@ ThreeGppV2vUrbanPropagationLossModel::~ThreeGppV2vUrbanPropagationLossModel()
 }
 
 double
-ThreeGppV2vUrbanPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppV2vUrbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-  double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
 
     // compute the pathloss (see 3GPP TR 37.885, Table 6.2.1-1)
     double loss = 38.77 + 16.7 * log10(distance3D) + 18.2 * log10(m_frequency / 1e9);
@@ -87,32 +87,33 @@ ThreeGppV2vUrbanPropagationLossModel::GetO2iDistance2dIn() const
 }
 
 double
-ThreeGppV2vUrbanPropagationLossModel::GetLossNlosv (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppV2vUrbanPropagationLossModel::GetLossNlosv(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
     NS_LOG_FUNCTION(this);
 
-  // compute the pathloss (see 3GPP TR 37.885, Table 6.2.1-1)
-  double loss = GetLossLos (a, b) + GetAdditionalNlosvLoss (a, b);
+    // compute the pathloss (see 3GPP TR 37.885, Table 6.2.1-1)
+    double loss = GetLossLos(a, b) + GetAdditionalNlosvLoss(a, b);
 
     return loss;
 }
 
 double
-ThreeGppV2vUrbanPropagationLossModel::GetAdditionalNlosvLoss (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppV2vUrbanPropagationLossModel::GetAdditionalNlosvLoss(Ptr<MobilityModel> a,
+                                                             Ptr<MobilityModel> b) const
 {
     NS_LOG_FUNCTION(this);
-  double hBs=0,hUt=0;
-  double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
-  std::pair<double, double> heights = GetUtAndBsHeights (a->GetPosition ().z, b->GetPosition ().z);
-  if(heights.first > heights.second)
+    double hBs = 0, hUt = 0;
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
+    std::pair<double, double> heights = GetUtAndBsHeights(a->GetPosition().z, b->GetPosition().z);
+    if (heights.first > heights.second)
     {
-      hBs = heights.first;
-      hUt = heights.second;
+        hBs = heights.first;
+        hUt = heights.second;
     }
-  else
+    else
     {
-      hBs = heights.second;
-      hUt = heights.first;
+        hBs = heights.second;
+        hUt = heights.first;
     }
     // From TR 37.885 v15.2.0
     // When a V2V link is in NLOSv, additional vehicle blockage loss is
@@ -172,11 +173,11 @@ ThreeGppV2vUrbanPropagationLossModel::GetAdditionalNlosvLoss (Ptr<MobilityModel>
 }
 
 double
-ThreeGppV2vUrbanPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppV2vUrbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
     NS_LOG_FUNCTION(this);
 
-  double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
 
     double loss = 36.85 + 30 * log10(distance3D) + 18.9 * log10(m_frequency / 1e9);
 
@@ -271,11 +272,11 @@ ThreeGppV2vHighwayPropagationLossModel::~ThreeGppV2vHighwayPropagationLossModel(
 }
 
 double
-ThreeGppV2vHighwayPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppV2vHighwayPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
     NS_LOG_FUNCTION(this);
 
-  double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
 
     // compute the pathloss (see 3GPP TR 37.885, Table 6.2.1-1)
     double loss = 32.4 + 20 * log10(distance3D) + 20 * log10(m_frequency / 1e9);

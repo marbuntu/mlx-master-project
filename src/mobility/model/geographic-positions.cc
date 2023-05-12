@@ -167,106 +167,119 @@ GeographicPositions::CartesianToGeographicCoordinates(Vector pos, EarthSpheroidT
     return lla;
 }
 
-Vector GeographicPositions::GeographicToTopocentricCoordinates (Vector pos, Vector refPoint, EarthSpheroidType sphType)
+Vector
+GeographicPositions::GeographicToTopocentricCoordinates(Vector pos,
+                                                        Vector refPoint,
+                                                        EarthSpheroidType sphType)
 {
-  NS_LOG_FUNCTION (pos << sphType);
+    NS_LOG_FUNCTION(pos << sphType);
 
-  double phi = DEG2RAD * pos.x;
-  double lambda = DEG2RAD * pos.y;
-  double h = pos.z;
-  double phi0 = DEG2RAD * refPoint.x;
-  double lambda0 = DEG2RAD * refPoint.y;
-  double h0 = refPoint.z;
-  double a; // semi-major axis of earth
-  double e; // first eccentricity of earth
+    double phi = DEG2RAD * pos.x;
+    double lambda = DEG2RAD * pos.y;
+    double h = pos.z;
+    double phi0 = DEG2RAD * refPoint.x;
+    double lambda0 = DEG2RAD * refPoint.y;
+    double h0 = refPoint.z;
+    double a; // semi-major axis of earth
+    double e; // first eccentricity of earth
 
-  if (sphType == SPHERE)
+    if (sphType == SPHERE)
     {
-      a = EARTH_RADIUS;
-      e = 0;
+        a = EARTH_RADIUS;
+        e = 0;
     }
-  else if (sphType == GRS80)
+    else if (sphType == GRS80)
     {
-      a = EARTH_SEMIMAJOR_AXIS;
-      e = EARTH_GRS80_ECCENTRICITY;
+        a = EARTH_SEMIMAJOR_AXIS;
+        e = EARTH_GRS80_ECCENTRICITY;
     }
-  else // if sphType == WGS84
+    else // if sphType == WGS84
     {
-      a = EARTH_SEMIMAJOR_AXIS;
-      e = EARTH_WGS84_ECCENTRICITY;
+        a = EARTH_SEMIMAJOR_AXIS;
+        e = EARTH_WGS84_ECCENTRICITY;
     }
-  
-  double v = a/(pow((1-pow(e,2)*pow(sin(phi),2)),0.5)); // the radius of curvature in the prime vertical at latitude
-  double v0 = a/(pow((1-pow(e,2)*pow(sin(phi0),2)),0.5)); // the radius of curvature in the prime vertical at latitude of the reference point
 
-  double U = (v+h)*cos(phi)*sin(lambda-lambda0);
-  double V = ( v + h ) * ( sin(phi) * cos(phi0) - cos(phi) * sin(phi0) * cos(lambda - lambda0) ) + pow(e,2) * (v0 * sin(phi0) - v * sin(phi)) * cos(phi0);
-  double W = ( v + h ) * ( sin(phi) * sin(phi0) + cos(phi) * cos(phi0) * cos(lambda - lambda0) ) + pow(e,2) * (v0 * sin(phi0) - v * sin(phi)) * sin(phi0) - (v0 + h0);
+    double v = a / (pow((1 - pow(e, 2) * pow(sin(phi), 2)),
+                        0.5)); // the radius of curvature in the prime vertical at latitude
+    double v0 = a / (pow((1 - pow(e, 2) * pow(sin(phi0), 2)),
+                         0.5)); // the radius of curvature in the prime vertical at latitude of the
+                                // reference point
 
-  Vector topocentricCoordinates = Vector (U, V, W);
-  return topocentricCoordinates;
+    double U = (v + h) * cos(phi) * sin(lambda - lambda0);
+    double V = (v + h) * (sin(phi) * cos(phi0) - cos(phi) * sin(phi0) * cos(lambda - lambda0)) +
+               pow(e, 2) * (v0 * sin(phi0) - v * sin(phi)) * cos(phi0);
+    double W = (v + h) * (sin(phi) * sin(phi0) + cos(phi) * cos(phi0) * cos(lambda - lambda0)) +
+               pow(e, 2) * (v0 * sin(phi0) - v * sin(phi)) * sin(phi0) - (v0 + h0);
+
+    Vector topocentricCoordinates = Vector(U, V, W);
+    return topocentricCoordinates;
 }
 
-Vector GeographicPositions::TopocentricToGeographicCoordinates (Vector pos, Vector refPoint, EarthSpheroidType sphType)
+Vector
+GeographicPositions::TopocentricToGeographicCoordinates(Vector pos,
+                                                        Vector refPoint,
+                                                        EarthSpheroidType sphType)
 {
-  NS_LOG_FUNCTION (pos << sphType);
+    NS_LOG_FUNCTION(pos << sphType);
 
-  double U = pos.x;
-  double V = pos.y;
-  double W = pos.z;
-  double phi0 = DEG2RAD * refPoint.x;
-  double lambda0 = DEG2RAD * refPoint.y;
-  double h0 = refPoint.z;
-  double a; // semi-major axis of earth
-  double e; // first eccentricity of earth
-  double f; // flattening
+    double U = pos.x;
+    double V = pos.y;
+    double W = pos.z;
+    double phi0 = DEG2RAD * refPoint.x;
+    double lambda0 = DEG2RAD * refPoint.y;
+    double h0 = refPoint.z;
+    double a; // semi-major axis of earth
+    double e; // first eccentricity of earth
+    double f; // flattening
 
-  if (sphType == SPHERE)
+    if (sphType == SPHERE)
     {
-      a = EARTH_RADIUS;
-      e = 0;
-      f = 0;
+        a = EARTH_RADIUS;
+        e = 0;
+        f = 0;
     }
-  else if (sphType == GRS80)
+    else if (sphType == GRS80)
     {
-      a = EARTH_SEMIMAJOR_AXIS;
-      e = EARTH_GRS80_ECCENTRICITY;
-      f = EARTH_GRS80_FLATTENING;
+        a = EARTH_SEMIMAJOR_AXIS;
+        e = EARTH_GRS80_ECCENTRICITY;
+        f = EARTH_GRS80_FLATTENING;
     }
-  else // if sphType == WGS84
+    else // if sphType == WGS84
     {
-      a = EARTH_SEMIMAJOR_AXIS;
-      e = EARTH_WGS84_ECCENTRICITY;
-      f = EARTH_WGS84_FLATTENING;
+        a = EARTH_SEMIMAJOR_AXIS;
+        e = EARTH_WGS84_ECCENTRICITY;
+        f = EARTH_WGS84_FLATTENING;
     }
-  
-  double v0 = a/(pow((1-pow(e,2)*pow(sin(phi0),2)),0.5)); // the radius of curvature in the prime vertical at latitude of the reference point
 
-  double X0 = ( v0 + h0 ) * cos(phi0) * cos(lambda0);
-  double Y0 = ( v0 + h0 ) * cos(phi0) * sin(lambda0);
-  double Z0 = ( (1-pow(e,2)) * v0 + h0) * sin(phi0);
+    double v0 = a / (pow((1 - pow(e, 2) * pow(sin(phi0), 2)),
+                         0.5)); // the radius of curvature in the prime vertical at latitude of the
+                                // reference point
 
-  double X = X0 - U * sin(lambda0) - V * sin(phi0) * cos(lambda0) + W * cos(phi0) * cos(lambda0);
-  double Y = Y0 + U * cos(lambda0) - V * sin(phi0) * sin(lambda0) + W * cos(phi0) * sin(lambda0);
-  double Z = Z0 + V * cos(phi0) + W * sin(phi0);
+    double X0 = (v0 + h0) * cos(phi0) * cos(lambda0);
+    double Y0 = (v0 + h0) * cos(phi0) * sin(lambda0);
+    double Z0 = ((1 - pow(e, 2)) * v0 + h0) * sin(phi0);
 
-  double epsilon = pow(e,2)/(1-pow(e,2));
-  double b = a * (1-f);
-  double p = sqrt( pow(X,2) + pow(Y,2) );
-  double q = atan2( (Z*a), (p*b));
+    double X = X0 - U * sin(lambda0) - V * sin(phi0) * cos(lambda0) + W * cos(phi0) * cos(lambda0);
+    double Y = Y0 + U * cos(lambda0) - V * sin(phi0) * sin(lambda0) + W * cos(phi0) * sin(lambda0);
+    double Z = Z0 + V * cos(phi0) + W * sin(phi0);
 
-  double phi = atan2( (Z + epsilon * b * pow(sin(q),3)) , (p - pow(e,2) * a * pow(cos(q),3)) );
-  double lambda = atan2( Y , X );
-  
-  double v = a/(pow((1-pow(e,2)*pow(sin(phi),2)),0.5));
+    double epsilon = pow(e, 2) / (1 - pow(e, 2));
+    double b = a * (1 - f);
+    double p = sqrt(pow(X, 2) + pow(Y, 2));
+    double q = atan2((Z * a), (p * b));
 
-  double h = ( p / cos(phi)) - v;
+    double phi = atan2((Z + epsilon * b * pow(sin(q), 3)), (p - pow(e, 2) * a * pow(cos(q), 3)));
+    double lambda = atan2(Y, X);
 
-  phi *= RAD2DEG;
-  lambda *= RAD2DEG;
+    double v = a / (pow((1 - pow(e, 2) * pow(sin(phi), 2)), 0.5));
 
-  Vector geographicCoordinates = Vector (phi, lambda, h);
-  return geographicCoordinates;
+    double h = (p / cos(phi)) - v;
+
+    phi *= RAD2DEG;
+    lambda *= RAD2DEG;
+
+    Vector geographicCoordinates = Vector(phi, lambda, h);
+    return geographicCoordinates;
 }
 
 std::list<Vector>

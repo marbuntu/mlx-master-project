@@ -184,13 +184,13 @@ This implementation does not adopt any type of approximation for the field patte
 By default the orientation is the same as the z-axis, facing the sky (z-axis positive direction), but can be changed using the AntennaInclination and AntennaAzimuth parameters.
 The antenna gain in decimal scale is determined using:
 
-.. math:: 
+.. math::
    G \cdot 4\left | \frac{J_{1}\left ( k\cdot a\cdot sin\theta \right )}{k\cdot a\cdot sin\theta} \right |^{2}\;\;\;\;\; for\; 0<\left | \theta \right |\leq 90^{\circ} \\
    G \cdot 1\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; for\; \theta=0
 
-Where :math:`J_{1}()` is the Bessel function of the first kind and first order, :math:`G` is the linear gain value, :math:`a` is the radius of the antenna's circular aperture, 
-and given a frequency of operation :math:`f` the value :math:`k` is equal to :math:`k=\frac{2\pi f}{x}`, 
-with :math:`c` the speed of light in vacuum. This type of antennas feature a symmetric radiation patter, meaning that only one angle is enough to calculate the radiation strength in a certain direction, 
+Where :math:`J_{1}()` is the Bessel function of the first kind and first order, :math:`G` is the linear gain value, :math:`a` is the radius of the antenna's circular aperture,
+and given a frequency of operation :math:`f` the value :math:`k` is equal to :math:`k=\frac{2\pi f}{x}`,
+with :math:`c` the speed of light in vacuum. This type of antennas feature a symmetric radiation pattern, meaning that only one angle is enough to calculate the radiation strength in a certain direction,
 since only the angle :math:`\theta` from the bore sight is needed.
 The parameters :math:`G` (in decibel scale), :math:`a` and :math:`f` can be configured using the attributes: "AntennaMaxGainDb", "AntennaCircularApertureRadius" and "OperatingFrequency".
 

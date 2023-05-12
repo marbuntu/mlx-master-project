@@ -854,27 +854,27 @@ This is the base class for the 3GPP NTN channel condition models.
 It provides the possibility to updated the condition of each channel periodically,
 after a given time period which can be configured through the attribute "UpdatePeriod".
 If "UpdatePeriod" is set to 0, the channel condition is never updated.
-It has four derived classes implementing the channel condition models described in 3GPP TR 38.811 [38811]_ 
+It has four derived classes implementing the channel condition models described in 3GPP TR 38.811 [38811]_
 for different propagation scenarios.
 
 ThreeGppDenseUrbanChannelConditionModel
 ```````````````````````````````````````
-This implements the statistical channel condition model described in 3GPP TR 38.811 [38811]_, 
+This implements the statistical channel condition model described in 3GPP TR 38.811 [38811]_,
 Table 6.6.1-1, for the Dense Urban scenario.
 
 ThreeGppUrbanChannelConditionModel
 ``````````````````````````````````
-This implements the statistical channel condition model described in 3GPP TR 38.811 [38811]_, 
+This implements the statistical channel condition model described in 3GPP TR 38.811 [38811]_,
 Table 6.6.1-1, for the Urban scenario.
 
 ThreeGppSuburbanStreetCanyonChannelConditionModel
 `````````````````````````````````````````````````
-This implements the statistical channel condition model described in 3GPP TR 38.811 [38811]_, 
+This implements the statistical channel condition model described in 3GPP TR 38.811 [38811]_,
 Table 6.6.1-1, for the Suburban scenario.
 
 ThreeGppRuralChannelConditionModel
 ``````````````````````````````````
-This implements the statistical channel condition model described in 3GPP TR 38.811 [38811]_, 
+This implements the statistical channel condition model described in 3GPP TR 38.811 [38811]_,
 Table 6.6.1-1, for the Rural office scenario.
 
 

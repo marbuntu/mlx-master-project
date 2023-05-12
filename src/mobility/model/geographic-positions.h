@@ -91,74 +91,76 @@ class GeographicPositions
      */
     static Vector CartesianToGeographicCoordinates(Vector pos, EarthSpheroidType sphType);
 
-/**
- * Conversion from geographic to topocentric.
- * 
- * Conversion taken from IOGP Report 373-07-02.
- *
- * @param pos a vector containing the Geographic coordinates (latitude, longitute, altitute)
- * @param refPoint a vector containing the reference point. Default is (0,0,0S)
- * @param sphType earth spheroid model to use for conversion
- *
- * @return Vector position using planar Cartesian coordinates, same as NS-3
- *
- * IOGP. Geomatics guidance note 7, part 2: coordinate conversions & transformations including formulas. 
- * IOGP Publication 373-7-2, International Association For Oil And Gas Producers, 2018
- * https://www.iogp.org/bookstore/product/coordinate-conversions-and-transformation-including-formulas/
- */
-static Vector GeographicToTopocentricCoordinates (Vector pos, Vector refPoint,
-                                                EarthSpheroidType sphType);
+    /**
+     * Conversion from geographic to topocentric.
+     *
+     * Conversion taken from IOGP Report 373-07-02.
+     *
+     * @param pos a vector containing the Geographic coordinates (latitude, longitude, altitude)
+     * @param refPoint a vector containing the reference point. Default is (0,0,0S)
+     * @param sphType earth spheroid model to use for conversion
+     *
+     * @return Vector position using planar Cartesian coordinates, same as NS-3
+     *
+     * IOGP. Geomatics guidance note 7, part 2: coordinate conversions & transformations including
+     * formulas. IOGP Publication 373-7-2, International Association For Oil And Gas Producers, 2018
+     * https://www.iogp.org/bookstore/product/coordinate-conversions-and-transformation-including-formulas/
+     */
+    static Vector GeographicToTopocentricCoordinates(Vector pos,
+                                                     Vector refPoint,
+                                                     EarthSpheroidType sphType);
 
-/**
- * Conversion from topocentric to geographic.
- * 
- * Conversion taken from IOGP Report 373-07-02.
- *
- * @param pos a vector containing the topocentric coordinates (U, V, W)
- * @param refPoint a vector containing the reference point. Default is (0,0,0)
- * @param sphType earth spheroid model to use for conversion
- *
- * @return Vector position using geograpic coordinates
- *
- * IOGP. Geomatics guidance note 7, part 2: coordinate conversions & transformations including formulas. 
- * IOGP Publication 373-7-2, International Association For Oil And Gas Producers, 2018
- * https://www.iogp.org/bookstore/product/coordinate-conversions-and-transformation-including-formulas/
- */
-static Vector TopocentricToGeographicCoordinates (Vector pos, Vector refPoint,
-                                                EarthSpheroidType sphType);
+    /**
+     * Conversion from topocentric to geographic.
+     *
+     * Conversion taken from IOGP Report 373-07-02.
+     *
+     * @param pos a vector containing the topocentric coordinates (U, V, W)
+     * @param refPoint a vector containing the reference point. Default is (0,0,0)
+     * @param sphType earth spheroid model to use for conversion
+     *
+     * @return Vector position using geograpic coordinates
+     *
+     * IOGP. Geomatics guidance note 7, part 2: coordinate conversions & transformations including
+     * formulas. IOGP Publication 373-7-2, International Association For Oil And Gas Producers, 2018
+     * https://www.iogp.org/bookstore/product/coordinate-conversions-and-transformation-including-formulas/
+     */
+    static Vector TopocentricToGeographicCoordinates(Vector pos,
+                                                     Vector refPoint,
+                                                     EarthSpheroidType sphType);
 
-  /**
-   * Generates uniformly distributed random points (in ECEF Cartesian 
-   * coordinates) within a given altitude above earth's surface centered around 
-   * a given origin point (on earth's surface, in geographic/geodetic coordinates) 
-   * within a given distance radius (using arc length of earth's surface, not 
-   * pythagorean distance).
-   * Distance radius is measured as if all generated points are on earth's 
-   * surface (with altitude = 0).
-   * Assumes earth is a perfect sphere.
-   * 
-   * @param originLatitude origin point latitude in degrees
-   * @param originLongitude origin point longitude in degrees
-   * @param maxAltitude maximum altitude in meters above earth's surface with
-   * which random points can be generated
-   * @param numPoints number of points to generate
-   * @param maxDistFromOrigin max distance in meters from origin with which 
-   * random transmitters can be generated (all transmitters are less than or 
-   * equal to this distance from the origin, relative to points being on earth's 
-   * surface)
-   * @param uniRand pointer to the uniform random variable to use for random 
-   * location and altitude generation
-   *
-   * @return a list containing the vectors (x, y, z location referenced in 
-   * meters from origin at center of earth) of each point generated
-   */
-  static std::list<Vector> RandCartesianPointsAroundGeographicPoint (double originLatitude, 
-                                                                     double originLongitude,
-                                                                     double maxAltitude, 
-                                                                     int numPoints, 
-                                                                     double maxDistFromOrigin,
-                                                                     Ptr<UniformRandomVariable> uniRand);
-
+    /**
+     * Generates uniformly distributed random points (in ECEF Cartesian
+     * coordinates) within a given altitude above earth's surface centered around
+     * a given origin point (on earth's surface, in geographic/geodetic coordinates)
+     * within a given distance radius (using arc length of earth's surface, not
+     * pythagorean distance).
+     * Distance radius is measured as if all generated points are on earth's
+     * surface (with altitude = 0).
+     * Assumes earth is a perfect sphere.
+     *
+     * @param originLatitude origin point latitude in degrees
+     * @param originLongitude origin point longitude in degrees
+     * @param maxAltitude maximum altitude in meters above earth's surface with
+     * which random points can be generated
+     * @param numPoints number of points to generate
+     * @param maxDistFromOrigin max distance in meters from origin with which
+     * random transmitters can be generated (all transmitters are less than or
+     * equal to this distance from the origin, relative to points being on earth's
+     * surface)
+     * @param uniRand pointer to the uniform random variable to use for random
+     * location and altitude generation
+     *
+     * @return a list containing the vectors (x, y, z location referenced in
+     * meters from origin at center of earth) of each point generated
+     */
+    static std::list<Vector> RandCartesianPointsAroundGeographicPoint(
+        double originLatitude,
+        double originLongitude,
+        double maxAltitude,
+        int numPoints,
+        double maxDistFromOrigin,
+        Ptr<UniformRandomVariable> uniRand);
 };
 
 } // namespace ns3

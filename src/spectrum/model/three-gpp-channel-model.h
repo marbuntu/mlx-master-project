@@ -242,16 +242,17 @@ class ThreeGppChannelModel : public MatrixBasedChannelModel
                               //!< ASA, ZSD, ZSA]
     };
 
-  /**
-   * Get the parameters needed to apply the channel generation procedure
-   * \param aMob the mobility model of node A
-   * \param bMob the mobility model of node B
-   * \param channelCondition the channel condition
-   * \return the parameters table
-   */
-  virtual Ptr<const ParamsTable> GetThreeGppTable (const Ptr<const MobilityModel> aMob,
-                                                   const Ptr<const MobilityModel> bMob, 
-                                                   Ptr<const ChannelCondition> channelCondition) const;
+    /**
+     * Get the parameters needed to apply the channel generation procedure
+     * \param aMob the mobility model of node A
+     * \param bMob the mobility model of node B
+     * \param channelCondition the channel condition
+     * \return the parameters table
+     */
+    virtual Ptr<const ParamsTable> GetThreeGppTable(
+        const Ptr<const MobilityModel> aMob,
+        const Ptr<const MobilityModel> bMob,
+        Ptr<const ChannelCondition> channelCondition) const;
 
     /**
      * Prepare 3gpp channel parameters among the nodes a and b.
@@ -369,14 +370,30 @@ class ThreeGppChannelModel : public MatrixBasedChannelModel
     static const uint8_t Y_INDEX = 3; //!< index of the Y value in the m_nonSelfBlocking array
     static const uint8_t R_INDEX = 4; //!< index of the R value in the m_nonSelfBlocking array
 
-  const std::map<std::string, std::map<int,std::vector<float>>> *m_NTNDenseUrbanLOS; //The nested map containing the threegpp value tables for the NTN Dense Urban LOS scenario
-  const std::map<std::string, std::map<int,std::vector<float>>> *m_NTNDenseUrbanNLOS; //The nested map containing the threegpp value tables for the NTN Dense Urban NLOS scenario
-  const std::map<std::string, std::map<int,std::vector<float>>> *m_NTNUrbanLOS; //The nested map containing the threegpp value tables for the NTN Urban LOS scenario
-  const std::map<std::string, std::map<int,std::vector<float>>> *m_NTNUrbanNLOS; //The nested map containing the threegpp value tables for the NTN Urban NLOS scenario
-  const std::map<std::string, std::map<int,std::vector<float>>> *m_NTNSuburbanLOS; //The nested map containing the threegpp value tables for the NTN Suburban LOS scenario
-  const std::map<std::string, std::map<int,std::vector<float>>> *m_NTNSuburbanNLOS; //The nested map containing the threegpp value tables for the NTN Suburban NLOS scenario
-  const std::map<std::string, std::map<int,std::vector<float>>> *m_NTNRuralLOS; //The nested map containing the threegpp value tables for the NTN Rural LOS scenario
-  const std::map<std::string, std::map<int,std::vector<float>>> *m_NTNRuralNLOS; //The nested map containing the threegpp value tables for the NTN Rural NLOS scenario
+    const std::map<std::string, std::map<int, std::vector<float>>>*
+        m_NTNDenseUrbanLOS; // The nested map containing the threegpp value tables for the NTN Dense
+                            // Urban LOS scenario
+    const std::map<std::string, std::map<int, std::vector<float>>>*
+        m_NTNDenseUrbanNLOS; // The nested map containing the threegpp value tables for the NTN
+                             // Dense Urban NLOS scenario
+    const std::map<std::string, std::map<int, std::vector<float>>>*
+        m_NTNUrbanLOS; // The nested map containing the threegpp value tables for the NTN Urban LOS
+                       // scenario
+    const std::map<std::string, std::map<int, std::vector<float>>>*
+        m_NTNUrbanNLOS; // The nested map containing the threegpp value tables for the NTN Urban
+                        // NLOS scenario
+    const std::map<std::string, std::map<int, std::vector<float>>>*
+        m_NTNSuburbanLOS; // The nested map containing the threegpp value tables for the NTN
+                          // Suburban LOS scenario
+    const std::map<std::string, std::map<int, std::vector<float>>>*
+        m_NTNSuburbanNLOS; // The nested map containing the threegpp value tables for the NTN
+                           // Suburban NLOS scenario
+    const std::map<std::string, std::map<int, std::vector<float>>>*
+        m_NTNRuralLOS; // The nested map containing the threegpp value tables for the NTN Rural LOS
+                       // scenario
+    const std::map<std::string, std::map<int, std::vector<float>>>*
+        m_NTNRuralNLOS; // The nested map containing the threegpp value tables for the NTN Rural
+                        // NLOS scenario
 };
 } // namespace ns3
 

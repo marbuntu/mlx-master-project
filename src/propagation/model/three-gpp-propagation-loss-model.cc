@@ -21,12 +21,12 @@
 #include "ns3/boolean.h"
 #include "ns3/channel-condition-model.h"
 #include "ns3/double.h"
+#include "ns3/geocentric-constant-position-mobility-model.h"
 #include "ns3/log.h"
 #include "ns3/mobility-model.h"
 #include "ns3/node.h"
 #include "ns3/pointer.h"
 #include "ns3/simulator.h"
-#include "ns3/geocentric-constant-position-mobility-model.h"
 
 #include <cmath>
 
@@ -159,11 +159,10 @@ ThreeGppPropagationLossModel::DoCalcRxPower(double txPowerDbm,
     NS_ASSERT_MSG(m_channelConditionModel, "First set the channel condition model");
     Ptr<ChannelCondition> cond = m_channelConditionModel->GetChannelCondition(a, b);
 
+    double rxPow = txPowerDbm;
+    rxPow -= GetLoss(cond, a, b);
 
-  double rxPow = txPowerDbm;
-  rxPow -= GetLoss (cond, a, b); 
-  
-  if (m_shadowingEnabled)
+    if (m_shadowingEnabled)
     {
         rxPow -= GetShadowing(a, b, cond->GetLosCondition());
     }
@@ -190,22 +189,24 @@ ThreeGppPropagationLossModel::DoCalcRxPower(double txPowerDbm,
 }
 
 double
-ThreeGppPropagationLossModel::GetLoss (Ptr<ChannelCondition> cond, Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppPropagationLossModel::GetLoss(Ptr<ChannelCondition> cond,
+                                      Ptr<MobilityModel> a,
+                                      Ptr<MobilityModel> b) const
 {
     NS_LOG_FUNCTION(this);
 
     double loss = 0;
     if (cond->GetLosCondition() == ChannelCondition::LosConditionValue::LOS)
     {
-      loss = GetLossLos (a, b);
+        loss = GetLossLos(a, b);
     }
     else if (cond->GetLosCondition() == ChannelCondition::LosConditionValue::NLOSv)
     {
-      loss = GetLossNlosv (a, b);
+        loss = GetLossNlosv(a, b);
     }
     else if (cond->GetLosCondition() == ChannelCondition::LosConditionValue::NLOS)
     {
-      loss = GetLossNlos (a, b);
+        loss = GetLossNlos(a, b);
     }
     else
     {
@@ -534,24 +535,25 @@ ThreeGppRmaPropagationLossModel::GetO2iDistance2dIn() const
 }
 
 double
-ThreeGppRmaPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppRmaPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
-  NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 30.0e9, "RMa scenario is valid for frequencies between 0.5 and 30 GHz.");
+    NS_LOG_FUNCTION(this);
+    NS_ASSERT_MSG(m_frequency <= 30.0e9,
+                  "RMa scenario is valid for frequencies between 0.5 and 30 GHz.");
 
-  double hBs=0,hUt=0;
-  double distance2D = Calculate2dDistance (a->GetPosition (), b->GetPosition ());
-  double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
-  std::pair<double, double> heights = GetUtAndBsHeights (a->GetPosition ().z, b->GetPosition ().z);
-  if(heights.first > heights.second)
+    double hBs = 0, hUt = 0;
+    double distance2D = Calculate2dDistance(a->GetPosition(), b->GetPosition());
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
+    std::pair<double, double> heights = GetUtAndBsHeights(a->GetPosition().z, b->GetPosition().z);
+    if (heights.first > heights.second)
     {
-      hBs = heights.first;
-      hUt = heights.second;
+        hBs = heights.first;
+        hUt = heights.second;
     }
-  else
+    else
     {
-      hBs = heights.second;
-      hUt = heights.first;
+        hBs = heights.second;
+        hUt = heights.first;
     }
 
     // check if hBS and hUT are within the specified validity range
@@ -609,29 +611,29 @@ ThreeGppRmaPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityM
 }
 
 double
-ThreeGppRmaPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppRmaPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
     NS_LOG_FUNCTION(this);
     NS_ASSERT_MSG(m_frequency <= 30.0e9,
                   "RMa scenario is valid for frequencies between 0.5 and 30 GHz.");
 
-  double hBs=0,hUt=0;
-  double distance2D = Calculate2dDistance (a->GetPosition (), b->GetPosition ());
-  double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
-  std::pair<double, double> heights = GetUtAndBsHeights (a->GetPosition ().z, b->GetPosition ().z);
-  if(heights.first > heights.second)
+    double hBs = 0, hUt = 0;
+    double distance2D = Calculate2dDistance(a->GetPosition(), b->GetPosition());
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
+    std::pair<double, double> heights = GetUtAndBsHeights(a->GetPosition().z, b->GetPosition().z);
+    if (heights.first > heights.second)
     {
-      hBs = heights.first;
-      hUt = heights.second;
+        hBs = heights.first;
+        hUt = heights.second;
     }
-  else
+    else
     {
-      hBs = heights.second;
-      hUt = heights.first;
+        hBs = heights.second;
+        hUt = heights.first;
     }
 
-  // check if hBs and hUt are within the validity range
-  if (hUt < 1.0 || hUt > 10.0)
+    // check if hBs and hUt are within the validity range
+    if (hUt < 1.0 || hUt > 10.0)
     {
         NS_ABORT_MSG_IF(m_enforceRanges, "Rma UT height out of range");
         NS_LOG_WARN(
@@ -817,27 +819,27 @@ ThreeGppUmaPropagationLossModel::GetBpDistance(double hUt, double hBs, double di
 }
 
 double
-ThreeGppUmaPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppUmaPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
     NS_LOG_FUNCTION(this);
 
-  double hBs=0,hUt=0;
-  double distance2D = Calculate2dDistance (a->GetPosition (), b->GetPosition ());
-  double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
-  std::pair<double, double> heights = GetUtAndBsHeights (a->GetPosition ().z, b->GetPosition ().z);
-  if(heights.first > heights.second)
+    double hBs = 0, hUt = 0;
+    double distance2D = Calculate2dDistance(a->GetPosition(), b->GetPosition());
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
+    std::pair<double, double> heights = GetUtAndBsHeights(a->GetPosition().z, b->GetPosition().z);
+    if (heights.first > heights.second)
     {
-      hBs = heights.first;
-      hUt = heights.second;
+        hBs = heights.first;
+        hUt = heights.second;
     }
-  else
+    else
     {
-      hBs = heights.second;
-      hUt = heights.first;
+        hBs = heights.second;
+        hUt = heights.first;
     }
 
-  // check if hBS and hUT are within the validity range
-  if (hUt < 1.5 || hUt > 22.5)
+    // check if hBS and hUT are within the validity range
+    if (hUt < 1.5 || hUt > 22.5)
     {
         NS_ABORT_MSG_IF(m_enforceRanges, "Uma UT height out of range");
         NS_LOG_WARN(
@@ -897,27 +899,27 @@ ThreeGppUmaPropagationLossModel::GetO2iDistance2dIn() const
 }
 
 double
-ThreeGppUmaPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppUmaPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
     NS_LOG_FUNCTION(this);
 
-  double hBs=0,hUt=0;
-  double distance2D = Calculate2dDistance (a->GetPosition (), b->GetPosition ());
-  double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
-  std::pair<double, double> heights = GetUtAndBsHeights (a->GetPosition ().z, b->GetPosition ().z);
-  if(heights.first > heights.second)
+    double hBs = 0, hUt = 0;
+    double distance2D = Calculate2dDistance(a->GetPosition(), b->GetPosition());
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
+    std::pair<double, double> heights = GetUtAndBsHeights(a->GetPosition().z, b->GetPosition().z);
+    if (heights.first > heights.second)
     {
-      hBs = heights.first;
-      hUt = heights.second;
+        hBs = heights.first;
+        hUt = heights.second;
     }
-  else
+    else
     {
-      hBs = heights.second;
-      hUt = heights.first;
+        hBs = heights.second;
+        hUt = heights.first;
     }
 
-  // check if hBS and hUT are within the vaalidity range
-  if (hUt < 1.5 || hUt > 22.5)
+    // check if hBS and hUT are within the vaalidity range
+    if (hUt < 1.5 || hUt > 22.5)
     {
         NS_ABORT_MSG_IF(m_enforceRanges, "Uma UT height out of range");
         NS_LOG_WARN(
@@ -1065,27 +1067,28 @@ ThreeGppUmiStreetCanyonPropagationLossModel::GetO2iDistance2dIn() const
 }
 
 double
-ThreeGppUmiStreetCanyonPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppUmiStreetCanyonPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
+                                                        Ptr<MobilityModel> b) const
 {
     NS_LOG_FUNCTION(this);
 
-  double hBs=0,hUt=0;
-  double distance2D = Calculate2dDistance (a->GetPosition (), b->GetPosition ());
-  double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
-  std::pair<double, double> heights = GetUtAndBsHeights (a->GetPosition ().z, b->GetPosition ().z);
-  if(heights.first > heights.second)
+    double hBs = 0, hUt = 0;
+    double distance2D = Calculate2dDistance(a->GetPosition(), b->GetPosition());
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
+    std::pair<double, double> heights = GetUtAndBsHeights(a->GetPosition().z, b->GetPosition().z);
+    if (heights.first > heights.second)
     {
-      hBs = heights.first;
-      hUt = heights.second;
+        hBs = heights.first;
+        hUt = heights.second;
     }
-  else
+    else
     {
-      hBs = heights.second;
-      hUt = heights.first;
+        hBs = heights.second;
+        hUt = heights.first;
     }
 
-  // check if hBS and hUT are within the validity range
-  if (hUt < 1.5 || hUt >= 10.0)
+    // check if hBS and hUT are within the validity range
+    if (hUt < 1.5 || hUt >= 10.0)
     {
         NS_ABORT_MSG_IF(m_enforceRanges, "UmiStreetCanyon UT height out of range");
         NS_LOG_WARN(
@@ -1138,27 +1141,28 @@ ThreeGppUmiStreetCanyonPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, P
 }
 
 double
-ThreeGppUmiStreetCanyonPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppUmiStreetCanyonPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
+                                                         Ptr<MobilityModel> b) const
 {
     NS_LOG_FUNCTION(this);
 
-  double hBs=0,hUt=0;
-  double distance2D = Calculate2dDistance (a->GetPosition (), b->GetPosition ());
-  double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
-  std::pair<double, double> heights = GetUtAndBsHeights (a->GetPosition ().z, b->GetPosition ().z);
-  if(heights.first > heights.second)
+    double hBs = 0, hUt = 0;
+    double distance2D = Calculate2dDistance(a->GetPosition(), b->GetPosition());
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
+    std::pair<double, double> heights = GetUtAndBsHeights(a->GetPosition().z, b->GetPosition().z);
+    if (heights.first > heights.second)
     {
-      hBs = heights.first;
-      hUt = heights.second;
+        hBs = heights.first;
+        hUt = heights.second;
     }
-  else
+    else
     {
-      hBs = heights.second;
-      hUt = heights.first;
+        hBs = heights.second;
+        hUt = heights.first;
     }
 
-  // check if hBS and hUT are within the validity range
-  if (hUt < 1.5 || hUt >= 10.0)
+    // check if hBS and hUT are within the validity range
+    if (hUt < 1.5 || hUt >= 10.0)
     {
         NS_ABORT_MSG_IF(m_enforceRanges, "UmiStreetCanyon UT height out of range");
         NS_LOG_WARN(
@@ -1310,11 +1314,12 @@ ThreeGppIndoorOfficePropagationLossModel::GetO2iDistance2dIn() const
 }
 
 double
-ThreeGppIndoorOfficePropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppIndoorOfficePropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
+                                                     Ptr<MobilityModel> b) const
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-    double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
 
     // check if the distance is outside the validity range
     if (distance3D < 1.0 || distance3D > 150.0)
@@ -1333,11 +1338,12 @@ ThreeGppIndoorOfficePropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<
 }
 
 double
-ThreeGppIndoorOfficePropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppIndoorOfficePropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
+                                                      Ptr<MobilityModel> b) const
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-    double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
 
     // check if the distance is outside the validity range
     if (distance3D < 1.0 || distance3D > 150.0)
@@ -1410,116 +1416,125 @@ ThreeGppIndoorOfficePropagationLossModel::GetShadowingCorrelationDistance(
 /**
  * The enumerator used for code clarity when performing parameter assignment in the GetLoss Methods
  */
-enum SFCL_params {
-  S_LOS_sigF, S_NLOS_sigF, S_NLOS_CL, Ka_LOS_sigF, Ka_NLOS_sigF, Ka_NLOS_CL,
+enum SFCL_params
+{
+    S_LOS_sigF,
+    S_NLOS_sigF,
+    S_NLOS_CL,
+    Ka_LOS_sigF,
+    Ka_NLOS_sigF,
+    Ka_NLOS_CL,
 };
 
 /**
- * The map containing the threegpp value reagarding Shadow Fading and Clutter Loss tables for the NTN Dense Urban scenario
+ * The map containing the threegpp value reagarding Shadow Fading and Clutter Loss tables for the
+ * NTN Dense Urban scenario
  */
-const std::map<int, std::vector<float>> SFCL_DenseUrban {
-  {10,{3.5, 15.5, 34.3, 2.9, 17.1, 44.3}},
-  {20,{3.4, 13.9, 30.9, 2.4, 17.1, 39.9}},
-  {30,{2.9, 12.4, 29.0, 2.7, 15.6, 37.5}},
-  {40,{3.0, 11.7, 27.7, 2.4, 14.6, 35.8}},
-  {50,{3.1, 10.6, 26.8, 2.4, 14.2, 34.6}},
-  {60,{2.7, 10.5, 26.2, 2.7, 12.6, 33.8}},
-  {70,{2.5, 10.1, 25.8, 2.6, 12.1, 33.3}},
-  {80,{2.3, 9.2, 25.5, 2.8, 12.3, 33.0}},
-  {90,{1.2, 9.2, 25.5, 0.6, 12.3, 32.9}},
+const std::map<int, std::vector<float>> SFCL_DenseUrban{
+    {10, {3.5, 15.5, 34.3, 2.9, 17.1, 44.3}},
+    {20, {3.4, 13.9, 30.9, 2.4, 17.1, 39.9}},
+    {30, {2.9, 12.4, 29.0, 2.7, 15.6, 37.5}},
+    {40, {3.0, 11.7, 27.7, 2.4, 14.6, 35.8}},
+    {50, {3.1, 10.6, 26.8, 2.4, 14.2, 34.6}},
+    {60, {2.7, 10.5, 26.2, 2.7, 12.6, 33.8}},
+    {70, {2.5, 10.1, 25.8, 2.6, 12.1, 33.3}},
+    {80, {2.3, 9.2, 25.5, 2.8, 12.3, 33.0}},
+    {90, {1.2, 9.2, 25.5, 0.6, 12.3, 32.9}},
 };
 
 /**
- * The map containing the threegpp value reagarding Shadow Fading and Clutter Loss tables for the NTN Urban scenario
+ * The map containing the threegpp value reagarding Shadow Fading and Clutter Loss tables for the
+ * NTN Urban scenario
  */
-const std::map<int, std::vector<float>> SFCL_Urban {
-  {10,{4, 6, 34.3, 4, 6, 44.3}},
-  {20,{4, 6, 30.9, 4, 6, 39.9}},
-  {30,{4, 6, 29.0, 4, 6, 37.5}},
-  {40,{4, 6, 27.7, 4, 6, 35.8}},
-  {50,{4, 6, 26.8, 4, 6, 34.6}},
-  {60,{4, 6, 26.2, 4, 6, 33.8}},
-  {70,{4, 6, 25.8, 4, 6, 33.3}},
-  {80,{4, 6, 25.5, 4, 6, 33.0}},
-  {90,{4, 6, 25.5, 4, 6, 32.9}},
+const std::map<int, std::vector<float>> SFCL_Urban{
+    {10, {4, 6, 34.3, 4, 6, 44.3}},
+    {20, {4, 6, 30.9, 4, 6, 39.9}},
+    {30, {4, 6, 29.0, 4, 6, 37.5}},
+    {40, {4, 6, 27.7, 4, 6, 35.8}},
+    {50, {4, 6, 26.8, 4, 6, 34.6}},
+    {60, {4, 6, 26.2, 4, 6, 33.8}},
+    {70, {4, 6, 25.8, 4, 6, 33.3}},
+    {80, {4, 6, 25.5, 4, 6, 33.0}},
+    {90, {4, 6, 25.5, 4, 6, 32.9}},
 };
 
 /**
- * The map containing the threegpp value reagarding Shadow Fading and Clutter Loss tables for the NTN Suburban and Rural scenarios
+ * The map containing the threegpp value reagarding Shadow Fading and Clutter Loss tables for the
+ * NTN Suburban and Rural scenarios
  */
-const std::map<int, std::vector<float>> SFCL_SuburbanRural {
-  {10,{1.79, 8.93, 19.52, 1.9, 10.7, 29.5}},
-  {20,{1.14, 9.08, 18.17, 1.6, 10.0, 24.6}},
-  {30,{1.14, 8.78, 18.42, 1.9, 11.2, 21.9}},
-  {40,{0.92, 10.25, 18.28, 2.3, 11.6, 20.0}},
-  {50,{1.42, 10.56, 18.63, 2.7, 11.8, 18.7}},
-  {60,{1.56, 10.74, 17.68, 3.1, 10.8, 17.8}},
-  {70,{0.85, 10.17, 16.5, 3.0, 10.8, 17.2}},
-  {80,{0.72, 11.52, 16.3, 3.6, 10.8, 16.9}},
-  {90,{0.72, 11.52, 16.3, 0.4, 10.8, 16.8}}, 
+const std::map<int, std::vector<float>> SFCL_SuburbanRural{
+    {10, {1.79, 8.93, 19.52, 1.9, 10.7, 29.5}},
+    {20, {1.14, 9.08, 18.17, 1.6, 10.0, 24.6}},
+    {30, {1.14, 8.78, 18.42, 1.9, 11.2, 21.9}},
+    {40, {0.92, 10.25, 18.28, 2.3, 11.6, 20.0}},
+    {50, {1.42, 10.56, 18.63, 2.7, 11.8, 18.7}},
+    {60, {1.56, 10.74, 17.68, 3.1, 10.8, 17.8}},
+    {70, {0.85, 10.17, 16.5, 3.0, 10.8, 17.2}},
+    {80, {0.72, 11.52, 16.3, 3.6, 10.8, 16.9}},
+    {90, {0.72, 11.52, 16.3, 0.4, 10.8, 16.8}},
 };
 
 /**
  * Array containing the attenuation given by atmospheric absorption. 100 samples are selected for
- * frequencies from 1GHz to 100GHz. In order to get the atmospheric absorption loss for a given frequency f:
- * 1- round f to the closest integer between 0 and 100.
- * 2- use the obtained integer to access the corresponding element in the array, that will give the attenuation at that frequency.
+ * frequencies from 1GHz to 100GHz. In order to get the atmospheric absorption loss for a given
+ * frequency f: 1- round f to the closest integer between 0 and 100. 2- use the obtained integer to
+ * access the corresponding element in the array, that will give the attenuation at that frequency.
  * Data is obtained form ITU-R P.676 Figure 6.
  */
-const double atmosphericAbsorption[101] = {0, 
-                                     0.0300, 0.0350, 0.0380, 0.0390, 0.0410, 0.0420, 0.0450, 0.0480, 0.0500, 0.0530, 
-                                     0.0587, 0.0674, 0.0789, 0.0935, 0.1113, 0.1322, 0.1565, 0.1841, 0.2153, 0.2500, 
-                                     0.3362, 0.4581, 0.5200, 0.5200, 0.5000, 0.4500, 0.3850, 0.3200, 0.2700, 0.2500, 
-                                     0.2517, 0.2568, 0.2651, 0.2765, 0.2907, 0.3077, 0.3273, 0.3493, 0.3736, 0.4000, 
-                                     0.4375, 0.4966, 0.5795, 0.6881, 0.8247, 0.9912, 1.1900, 1.4229, 1.6922, 2.0000,
-                                     4.2654, 10.1504, 19.2717, 31.2457, 45.6890, 62.2182, 80.4496, 100.0000, 140.0205, 170.0000, 
-                                     100.0000, 78.1682, 59.3955, 43.5434, 30.4733, 20.0465, 12.1244, 6.5683, 3.2397, 2.0000, 
-                                     1.7708, 1.5660, 1.3858, 1.2298, 1.0981, 0.9905, 0.9070, 0.8475, 0.8119, 0.8000, 
-                                     0.8000, 0.8000, 0.8000, 0.8000, 0.8000, 0.8000, 0.8000, 0.8000, 0.8000, 0.8000, 
-                                     0.8029, 0.8112, 0.8243, 0.8416, 0.8625, 0.8864, 0.9127, 0.9408, 0.9701, 1.0000};
+const double atmosphericAbsorption[101] = {
+    0,        0.0300,   0.0350,  0.0380,  0.0390,  0.0410,  0.0420,  0.0450,  0.0480,   0.0500,
+    0.0530,   0.0587,   0.0674,  0.0789,  0.0935,  0.1113,  0.1322,  0.1565,  0.1841,   0.2153,
+    0.2500,   0.3362,   0.4581,  0.5200,  0.5200,  0.5000,  0.4500,  0.3850,  0.3200,   0.2700,
+    0.2500,   0.2517,   0.2568,  0.2651,  0.2765,  0.2907,  0.3077,  0.3273,  0.3493,   0.3736,
+    0.4000,   0.4375,   0.4966,  0.5795,  0.6881,  0.8247,  0.9912,  1.1900,  1.4229,   1.6922,
+    2.0000,   4.2654,   10.1504, 19.2717, 31.2457, 45.6890, 62.2182, 80.4496, 100.0000, 140.0205,
+    170.0000, 100.0000, 78.1682, 59.3955, 43.5434, 30.4733, 20.0465, 12.1244, 6.5683,   3.2397,
+    2.0000,   1.7708,   1.5660,  1.3858,  1.2298,  1.0981,  0.9905,  0.9070,  0.8475,   0.8119,
+    0.8000,   0.8000,   0.8000,  0.8000,  0.8000,  0.8000,  0.8000,  0.8000,  0.8000,   0.8000,
+    0.8000,   0.8029,   0.8112,  0.8243,  0.8416,  0.8625,  0.8864,  0.9127,  0.9408,   0.9701,
+    1.0000};
 
-const std::map<int, float> troposphericScintillationLoss {
-  {10,{1.08}},
-  {20,{0.48}},
-  {30,{0.30}},
-  {40,{0.22}},
-  {50,{0.17}},
-  {60,{0.13}},
-  {70,{0.12}},
-  {80,{0.12}},
-  {90,{0.12}},
+const std::map<int, float> troposphericScintillationLoss{
+    {10, {1.08}},
+    {20, {0.48}},
+    {30, {0.30}},
+    {40, {0.22}},
+    {50, {0.17}},
+    {60, {0.13}},
+    {70, {0.12}},
+    {80, {0.12}},
+    {90, {0.12}},
 };
-
 
 // ------------------------------------------------------------------------- //
 
-NS_OBJECT_ENSURE_REGISTERED (ThreeGppNTNDenseUrbanPropagationLossModel);
+NS_OBJECT_ENSURE_REGISTERED(ThreeGppNTNDenseUrbanPropagationLossModel);
 
 TypeId
-ThreeGppNTNDenseUrbanPropagationLossModel::GetTypeId (void)
+ThreeGppNTNDenseUrbanPropagationLossModel::GetTypeId(void)
 {
-  static TypeId tid = TypeId ("ns3::ThreeGppNTNDenseUrbanPropagationLossModel")
-    .SetParent<ThreeGppPropagationLossModel> ()
-    .SetGroupName ("Propagation")
-    .AddConstructor<ThreeGppNTNDenseUrbanPropagationLossModel> ()
-  ;
-  return tid;
+    static TypeId tid = TypeId("ns3::ThreeGppNTNDenseUrbanPropagationLossModel")
+                            .SetParent<ThreeGppPropagationLossModel>()
+                            .SetGroupName("Propagation")
+                            .AddConstructor<ThreeGppNTNDenseUrbanPropagationLossModel>();
+    return tid;
 }
 
-ThreeGppNTNDenseUrbanPropagationLossModel::ThreeGppNTNDenseUrbanPropagationLossModel ()
-  : ThreeGppPropagationLossModel ()
+ThreeGppNTNDenseUrbanPropagationLossModel::ThreeGppNTNDenseUrbanPropagationLossModel()
+    : ThreeGppPropagationLossModel()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-  // set a default channel condition model
-  m_channelConditionModel = CreateObject<ThreeGppRmaChannelConditionModel> ();  //TODO: Needs NTN channel condition model
+    // set a default channel condition model
+    m_channelConditionModel =
+        CreateObject<ThreeGppRmaChannelConditionModel>(); // TODO: Needs NTN channel condition model
 
-  m_SFCL_DenseUrban = &SFCL_DenseUrban;
+    m_SFCL_DenseUrban = &SFCL_DenseUrban;
 }
 
-ThreeGppNTNDenseUrbanPropagationLossModel::~ThreeGppNTNDenseUrbanPropagationLossModel ()
+ThreeGppNTNDenseUrbanPropagationLossModel::~ThreeGppNTNDenseUrbanPropagationLossModel()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
 double
@@ -1529,254 +1544,293 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetO2iDistance2dIn() const
 }
 
 double
-ThreeGppNTNDenseUrbanPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppNTNDenseUrbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
+                                                      Ptr<MobilityModel> b) const
 {
-  NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
+    NS_LOG_FUNCTION(this);
+    NS_ASSERT_MSG(m_frequency <= 100.0e9,
+                  "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
 
-  double elev_angle = 0;
-  double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
+    double elev_angle = 0;
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
 
-  Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
-  Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
-      
-  if(DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
-     DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(b))) //check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
-     {
-        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
-        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+    Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
+    Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
 
-        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
-        {
-          elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
-        }
-        else //a is the HAPS/Satellite
-        {
-          elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
-        }
-    }
-  else
+    if (DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
+        DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(
+            b))) // check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
     {
-      NS_FATAL_ERROR ("Mobility Models needs to be of type Geocentric for NTN scenarios");
+        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
+        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+
+        if (aNTNMob->GetGeographicPosition().z <
+            bNTNMob->GetGeographicPosition().z) // b is the HAPS/Satellite
+        {
+            elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
+        }
+        else // a is the HAPS/Satellite
+        {
+            elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
+        }
+    }
+    else
+    {
+        NS_FATAL_ERROR("Mobility Models needs to be of type Geocentric for NTN scenarios");
     }
 
-  int elev_angle_quantized = (elev_angle<10) ? 10 : round(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90..
-  NS_ASSERT_MSG ((elev_angle_quantized >= 10)&&(elev_angle_quantized <=90), "Invalid elevation angle!");
-  //Check 3D distance?
-  //Check hBS and hUE?
-  //Others checks?
+    int elev_angle_quantized =
+        (elev_angle < 10)
+            ? 10
+            : round(elev_angle / 10) *
+                  10; // Round the elevation angle into a two-digits integer between 10 and 90..
+    NS_ASSERT_MSG((elev_angle_quantized >= 10) && (elev_angle_quantized <= 90),
+                  "Invalid elevation angle!");
+    // Check 3D distance?
+    // Check hBS and hUE?
+    // Others checks?
 
-  // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
-  double loss = 0;
-  loss = 32.45 + 20 * log10(m_frequency/1e9) + 20 * log10(distance3D); //Basic FSPL
+    // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
+    double loss = 0;
+    loss = 32.45 + 20 * log10(m_frequency / 1e9) + 20 * log10(distance3D); // Basic FSPL
 
-  //Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
-  if((elev_angle < 10 && m_frequency>1e9)  || m_frequency>=10e9) 
-  {
-    int m_rounded_frequency = round(m_frequency/10e8);
-    loss += atmosphericAbsorption[m_rounded_frequency]/sin(elev_angle*(M_PI/180));
-  }
+    // Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
+    if ((elev_angle < 10 && m_frequency > 1e9) || m_frequency >= 10e9)
+    {
+        int m_rounded_frequency = round(m_frequency / 10e8);
+        loss += atmosphericAbsorption[m_rounded_frequency] / sin(elev_angle * (M_PI / 180));
+    }
 
-  //Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
-  if(m_frequency<6e9)
-  {
-    loss += 6.22/(pow(m_frequency/1e9,1.5));
-  }
+    // Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
+    if (m_frequency < 6e9)
+    {
+        loss += 6.22 / (pow(m_frequency / 1e9, 1.5));
+    }
 
-  //Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
-  if(m_frequency>6e9)
-  {
-    loss += troposphericScintillationLoss.at(elev_angle_quantized);
-  }
+    // Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
+    if (m_frequency > 6e9)
+    {
+        loss += troposphericScintillationLoss.at(elev_angle_quantized);
+    }
 
-  NS_LOG_DEBUG ("Loss " << loss);
-  return loss;
+    NS_LOG_DEBUG("Loss " << loss);
+    return loss;
 }
 
 double
-ThreeGppNTNDenseUrbanPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppNTNDenseUrbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
+                                                       Ptr<MobilityModel> b) const
 {
-  NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
+    NS_LOG_FUNCTION(this);
+    NS_ASSERT_MSG(m_frequency <= 100.0e9,
+                  "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
 
-  double elev_angle = 0;
-  double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
+    double elev_angle = 0;
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
 
-  Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
-  Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
-      
-  if(DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
-     DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(b))) //check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
-     {
-        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
-        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+    Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
+    Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
 
-        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
+    if (DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
+        DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(
+            b))) // check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
+    {
+        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
+        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+
+        if (aNTNMob->GetGeographicPosition().z <
+            bNTNMob->GetGeographicPosition().z) // b is the HAPS/Satellite
         {
-          elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
+            elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
-        else //a is the HAPS/Satellite
+        else // a is the HAPS/Satellite
         {
-          elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
+            elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
         }
     }
-  else
+    else
     {
-      NS_FATAL_ERROR ("Mobility Models needs to be of type Geocentric for NTN scenarios");
+        NS_FATAL_ERROR("Mobility Models needs to be of type Geocentric for NTN scenarios");
     }
 
-  int elev_angle_quantized = (elev_angle<10) ? 10 : round(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90..
-  NS_ASSERT_MSG ((elev_angle_quantized >= 10)&&(elev_angle_quantized <=90), "Invalid elevation angle!");
+    int elev_angle_quantized =
+        (elev_angle < 10)
+            ? 10
+            : round(elev_angle / 10) *
+                  10; // Round the elevation angle into a two-digits integer between 10 and 90..
+    NS_ASSERT_MSG((elev_angle_quantized >= 10) && (elev_angle_quantized <= 90),
+                  "Invalid elevation angle!");
 
-  // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
-  double loss = 0;
-  loss = 32.45 + 20 * log10(m_frequency/1e9) + 20 * log10(distance3D); //Basic FSPL
+    // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
+    double loss = 0;
+    loss = 32.45 + 20 * log10(m_frequency / 1e9) + 20 * log10(distance3D); // Basic FSPL
 
-  //Apply Clutter Loss
-  if(m_frequency<13.0e9)
+    // Apply Clutter Loss
+    if (m_frequency < 13.0e9)
     {
-      loss += (*m_SFCL_DenseUrban).at(elev_angle_quantized)[SFCL_params::S_NLOS_CL]; //Get the Clutter Loss for the S Band
+        loss += (*m_SFCL_DenseUrban)
+                    .at(elev_angle_quantized)[SFCL_params::S_NLOS_CL]; // Get the Clutter Loss for
+                                                                       // the S Band
     }
-  else
+    else
     {
-      loss += (*m_SFCL_DenseUrban).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_CL]; //Get the Clutter Loss for the Ka Band
+        loss += (*m_SFCL_DenseUrban)
+                    .at(elev_angle_quantized)[SFCL_params::Ka_NLOS_CL]; // Get the Clutter Loss for
+                                                                        // the Ka Band
     }
 
-  //Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
-  if((elev_angle < 10 && m_frequency>1e9)  || m_frequency>=10e9) 
-  {
-    int m_rounded_frequency = round(m_frequency/10e8);
-    loss += atmosphericAbsorption[m_rounded_frequency]/sin(elev_angle*(M_PI/180));
-  }
+    // Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
+    if ((elev_angle < 10 && m_frequency > 1e9) || m_frequency >= 10e9)
+    {
+        int m_rounded_frequency = round(m_frequency / 10e8);
+        loss += atmosphericAbsorption[m_rounded_frequency] / sin(elev_angle * (M_PI / 180));
+    }
 
-  //Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
-  if(m_frequency<6e9)
-  {
-    loss += 6.22/(pow(m_frequency/1e9,1.5));
-  }
+    // Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
+    if (m_frequency < 6e9)
+    {
+        loss += 6.22 / (pow(m_frequency / 1e9, 1.5));
+    }
 
-  //Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
-  if(m_frequency>6e9)
-  {
-    loss += troposphericScintillationLoss.at(elev_angle_quantized);
-  }
+    // Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
+    if (m_frequency > 6e9)
+    {
+        loss += troposphericScintillationLoss.at(elev_angle_quantized);
+    }
 
-  NS_LOG_DEBUG ("Loss " << loss);
-  return loss;
+    NS_LOG_DEBUG("Loss " << loss);
+    return loss;
 }
 
 double
-ThreeGppNTNDenseUrbanPropagationLossModel::GetShadowingStd (Ptr<MobilityModel> a, Ptr<MobilityModel> b, ChannelCondition::LosConditionValue cond) const
+ThreeGppNTNDenseUrbanPropagationLossModel::GetShadowingStd(
+    Ptr<MobilityModel> a,
+    Ptr<MobilityModel> b,
+    ChannelCondition::LosConditionValue cond) const
 {
-  NS_LOG_FUNCTION (this);
-  double shadowingStd;
-  
-  std::string freq_band = (m_frequency<13.0e9) ? "S" : "Ka";
-  double elev_angle = 0;
+    NS_LOG_FUNCTION(this);
+    double shadowingStd;
 
-  Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
-  Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
-      
-  if(DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
-     DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(b))) //check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
-     {
-        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
-        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+    std::string freq_band = (m_frequency < 13.0e9) ? "S" : "Ka";
+    double elev_angle = 0;
 
-        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
+    Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
+    Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
+
+    if (DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
+        DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(
+            b))) // check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
+    {
+        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
+        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+
+        if (aNTNMob->GetGeographicPosition().z <
+            bNTNMob->GetGeographicPosition().z) // b is the HAPS/Satellite
         {
-          elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
+            elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
-        else //a is the HAPS/Satellite
+        else // a is the HAPS/Satellite
         {
-          elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
+            elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
         }
     }
-  else
+    else
     {
-      NS_FATAL_ERROR ("Mobility Models needs to be of type Geocentric for NTN scenarios");
+        NS_FATAL_ERROR("Mobility Models needs to be of type Geocentric for NTN scenarios");
     }
 
-  int elev_angle_quantized = (elev_angle<10) ? 10 : round(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90..
-  NS_ASSERT_MSG ((elev_angle_quantized >= 10)&&(elev_angle_quantized <=90), "Invalid elevation angle!");
+    int elev_angle_quantized =
+        (elev_angle < 10)
+            ? 10
+            : round(elev_angle / 10) *
+                  10; // Round the elevation angle into a two-digits integer between 10 and 90..
+    NS_ASSERT_MSG((elev_angle_quantized >= 10) && (elev_angle_quantized <= 90),
+                  "Invalid elevation angle!");
 
-  //Assign Shadwoing Standard Deviation according to table 6.6.2-1
-  if (cond == ChannelCondition::LosConditionValue::LOS && freq_band == "S")
+    // Assign Shadwoing Standard Deviation according to table 6.6.2-1
+    if (cond == ChannelCondition::LosConditionValue::LOS && freq_band == "S")
     {
-      shadowingStd = (*m_SFCL_DenseUrban).at(elev_angle_quantized)[SFCL_params::S_LOS_sigF];
+        shadowingStd = (*m_SFCL_DenseUrban).at(elev_angle_quantized)[SFCL_params::S_LOS_sigF];
     }
-  else if (cond == ChannelCondition::LosConditionValue::LOS && freq_band == "Ka")
+    else if (cond == ChannelCondition::LosConditionValue::LOS && freq_band == "Ka")
     {
-      shadowingStd = (*m_SFCL_DenseUrban).at(elev_angle_quantized)[SFCL_params::Ka_LOS_sigF];
+        shadowingStd = (*m_SFCL_DenseUrban).at(elev_angle_quantized)[SFCL_params::Ka_LOS_sigF];
     }
-  else if (cond == ChannelCondition::LosConditionValue::NLOS && freq_band == "S")
+    else if (cond == ChannelCondition::LosConditionValue::NLOS && freq_band == "S")
     {
-      shadowingStd = (*m_SFCL_DenseUrban).at(elev_angle_quantized)[SFCL_params::S_NLOS_sigF]; 
+        shadowingStd = (*m_SFCL_DenseUrban).at(elev_angle_quantized)[SFCL_params::S_NLOS_sigF];
     }
-  else if (cond == ChannelCondition::LosConditionValue::NLOS && freq_band == "Ka")
+    else if (cond == ChannelCondition::LosConditionValue::NLOS && freq_band == "Ka")
     {
-      shadowingStd = (*m_SFCL_DenseUrban).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_sigF];
+        shadowingStd = (*m_SFCL_DenseUrban).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_sigF];
     }
-  else
+    else
     {
-      NS_FATAL_ERROR ("Unknown channel condition");
+        NS_FATAL_ERROR("Unknown channel condition");
     }
 
-  return shadowingStd;
+    return shadowingStd;
 }
 
 double
-ThreeGppNTNDenseUrbanPropagationLossModel::GetShadowingCorrelationDistance (ChannelCondition::LosConditionValue cond) const
+ThreeGppNTNDenseUrbanPropagationLossModel::GetShadowingCorrelationDistance(
+    ChannelCondition::LosConditionValue cond) const
 {
-  NS_LOG_FUNCTION (this);
-  double correlationDistance;
+    NS_LOG_FUNCTION(this);
+    double correlationDistance;
 
-  // See 3GPP TR 38.811, Table 6.7.2-1a/b and Table 6.7.2-2a/b
-  if (cond == ChannelCondition::LosConditionValue::LOS)
+    // See 3GPP TR 38.811, Table 6.7.2-1a/b and Table 6.7.2-2a/b
+    if (cond == ChannelCondition::LosConditionValue::LOS)
     {
-      correlationDistance = 37;
+        correlationDistance = 37;
     }
-  else if (cond == ChannelCondition::LosConditionValue::NLOS)
+    else if (cond == ChannelCondition::LosConditionValue::NLOS)
     {
-      correlationDistance = 50;
+        correlationDistance = 50;
     }
-  else
+    else
     {
-      NS_FATAL_ERROR ("Unknown channel condition");
+        NS_FATAL_ERROR("Unknown channel condition");
     }
 
-  return correlationDistance;
+    return correlationDistance;
 }
 
 // ------------------------------------------------------------------------- //
 
-NS_OBJECT_ENSURE_REGISTERED (ThreeGppNTNUrbanPropagationLossModel);
+NS_OBJECT_ENSURE_REGISTERED(ThreeGppNTNUrbanPropagationLossModel);
 
 TypeId
-ThreeGppNTNUrbanPropagationLossModel::GetTypeId (void)
+ThreeGppNTNUrbanPropagationLossModel::GetTypeId(void)
 {
-  static TypeId tid = TypeId ("ns3::ThreeGppNTNUrbanPropagationLossModel")
-    .SetParent<ThreeGppPropagationLossModel> ()
-    .SetGroupName ("Propagation")
-    .AddConstructor<ThreeGppNTNUrbanPropagationLossModel> ()
-  ;
-  return tid;
+    static TypeId tid = TypeId("ns3::ThreeGppNTNUrbanPropagationLossModel")
+                            .SetParent<ThreeGppPropagationLossModel>()
+                            .SetGroupName("Propagation")
+                            .AddConstructor<ThreeGppNTNUrbanPropagationLossModel>();
+    return tid;
 }
 
-ThreeGppNTNUrbanPropagationLossModel::ThreeGppNTNUrbanPropagationLossModel ()
-  : ThreeGppPropagationLossModel ()
+ThreeGppNTNUrbanPropagationLossModel::ThreeGppNTNUrbanPropagationLossModel()
+    : ThreeGppPropagationLossModel()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-  // set a default channel condition model
-  m_channelConditionModel = CreateObject<ThreeGppRmaChannelConditionModel> ();  //TODO: Needs NTN channel condition model
+    // set a default channel condition model
+    m_channelConditionModel =
+        CreateObject<ThreeGppRmaChannelConditionModel>(); // TODO: Needs NTN channel condition model
 
-  m_SFCL_Urban = &SFCL_Urban; 
+    m_SFCL_Urban = &SFCL_Urban;
 }
 
-ThreeGppNTNUrbanPropagationLossModel::~ThreeGppNTNUrbanPropagationLossModel ()
+ThreeGppNTNUrbanPropagationLossModel::~ThreeGppNTNUrbanPropagationLossModel()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
 double
@@ -1786,257 +1840,294 @@ ThreeGppNTNUrbanPropagationLossModel::GetO2iDistance2dIn() const
 }
 
 double
-ThreeGppNTNUrbanPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppNTNUrbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
-  NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
+    NS_LOG_FUNCTION(this);
+    NS_ASSERT_MSG(m_frequency <= 100.0e9,
+                  "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
 
-  double elev_angle = 0;
-  double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
+    double elev_angle = 0;
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
 
-  Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
-  Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
-      
-  if(DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
-     DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(b))) //check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
-     {
-        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
-        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+    Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
+    Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
 
-        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
-        {
-          elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
-        }
-        else //a is the HAPS/Satellite
-        {
-          elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
-        }
-    }
-  else
+    if (DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
+        DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(
+            b))) // check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
     {
-      NS_FATAL_ERROR ("Mobility Models needs to be of type Geocentric for NTN scenarios");
+        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
+        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+
+        if (aNTNMob->GetGeographicPosition().z <
+            bNTNMob->GetGeographicPosition().z) // b is the HAPS/Satellite
+        {
+            elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
+        }
+        else // a is the HAPS/Satellite
+        {
+            elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
+        }
+    }
+    else
+    {
+        NS_FATAL_ERROR("Mobility Models needs to be of type Geocentric for NTN scenarios");
     }
 
-  int elev_angle_quantized = (elev_angle<10) ? 10 : round(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90..
-  NS_ASSERT_MSG ((elev_angle_quantized >= 10)&&(elev_angle_quantized <=90), "Invalid elevation angle!");
-  //Check 3D distance?
-  //Check hBS and hUE?
-  //Others checks?
+    int elev_angle_quantized =
+        (elev_angle < 10)
+            ? 10
+            : round(elev_angle / 10) *
+                  10; // Round the elevation angle into a two-digits integer between 10 and 90..
+    NS_ASSERT_MSG((elev_angle_quantized >= 10) && (elev_angle_quantized <= 90),
+                  "Invalid elevation angle!");
+    // Check 3D distance?
+    // Check hBS and hUE?
+    // Others checks?
 
-  // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
-  double loss = 0;
-  loss = 32.45 + 20 * log10(m_frequency/1e9) + 20 * log10(distance3D); //Basic FSPL
+    // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
+    double loss = 0;
+    loss = 32.45 + 20 * log10(m_frequency / 1e9) + 20 * log10(distance3D); // Basic FSPL
 
-  //Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
-  if((elev_angle < 10 && m_frequency>1e9)  || m_frequency>=10e9) 
-  {
-    int m_rounded_frequency = round(m_frequency/10e8);
-    loss += atmosphericAbsorption[m_rounded_frequency]/sin(elev_angle*(M_PI/180));
-  }
+    // Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
+    if ((elev_angle < 10 && m_frequency > 1e9) || m_frequency >= 10e9)
+    {
+        int m_rounded_frequency = round(m_frequency / 10e8);
+        loss += atmosphericAbsorption[m_rounded_frequency] / sin(elev_angle * (M_PI / 180));
+    }
 
-  //Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
-  if(m_frequency<6e9)
-  {
-    loss += 6.22/(pow(m_frequency/1e9,1.5));
-  }
+    // Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
+    if (m_frequency < 6e9)
+    {
+        loss += 6.22 / (pow(m_frequency / 1e9, 1.5));
+    }
 
-  //Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
-  if(m_frequency>6e9)
-  {
-    loss += troposphericScintillationLoss.at(elev_angle_quantized);
-  }
+    // Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
+    if (m_frequency > 6e9)
+    {
+        loss += troposphericScintillationLoss.at(elev_angle_quantized);
+    }
 
-  NS_LOG_DEBUG ("Loss " << loss);
-  return loss;
+    NS_LOG_DEBUG("Loss " << loss);
+    return loss;
 }
 
 double
-ThreeGppNTNUrbanPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppNTNUrbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
-  NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
-  double elev_angle = 0;
-  double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
+    NS_LOG_FUNCTION(this);
+    NS_ASSERT_MSG(m_frequency <= 100.0e9,
+                  "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
+    double elev_angle = 0;
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
 
-  Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
-  Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
-      
-  if(DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
-     DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(b))) //check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
-     {
-        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
-        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+    Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
+    Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
 
-        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
+    if (DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
+        DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(
+            b))) // check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
+    {
+        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
+        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+
+        if (aNTNMob->GetGeographicPosition().z <
+            bNTNMob->GetGeographicPosition().z) // b is the HAPS/Satellite
         {
-          elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
+            elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
-        else //a is the HAPS/Satellite
+        else // a is the HAPS/Satellite
         {
-          elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
+            elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
         }
     }
-  else
+    else
     {
-      NS_FATAL_ERROR ("Mobility Models needs to be of type Geocentric for NTN scenarios");
+        NS_FATAL_ERROR("Mobility Models needs to be of type Geocentric for NTN scenarios");
     }
 
-  int elev_angle_quantized = (elev_angle<10) ? 10 : round(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90..
-  NS_ASSERT_MSG ((elev_angle_quantized >= 10)&&(elev_angle_quantized <=90), "Invalid elevation angle!");
-  //Check 3D distance?
-  //Check hBS and hUE?
-  //Others checks?
+    int elev_angle_quantized =
+        (elev_angle < 10)
+            ? 10
+            : round(elev_angle / 10) *
+                  10; // Round the elevation angle into a two-digits integer between 10 and 90..
+    NS_ASSERT_MSG((elev_angle_quantized >= 10) && (elev_angle_quantized <= 90),
+                  "Invalid elevation angle!");
+    // Check 3D distance?
+    // Check hBS and hUE?
+    // Others checks?
 
-  // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
-  double loss = 0;
-  loss = 32.45 + 20 * log10(m_frequency/1e9) + 20 * log10(distance3D); //Basic FSPL
+    // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
+    double loss = 0;
+    loss = 32.45 + 20 * log10(m_frequency / 1e9) + 20 * log10(distance3D); // Basic FSPL
 
-  //Apply Clutter Loss
-  if(m_frequency<13.0e9)
+    // Apply Clutter Loss
+    if (m_frequency < 13.0e9)
     {
-      loss += (*m_SFCL_Urban).at(elev_angle_quantized)[SFCL_params::S_NLOS_CL]; //Get the Clutter Loss for the S Band
+        loss +=
+            (*m_SFCL_Urban).at(elev_angle_quantized)[SFCL_params::S_NLOS_CL]; // Get the Clutter
+                                                                              // Loss for the S Band
     }
-  else
+    else
     {
-      loss += (*m_SFCL_Urban).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_CL]; //Get the Clutter Loss for the Ka Band
+        loss += (*m_SFCL_Urban)
+                    .at(elev_angle_quantized)[SFCL_params::Ka_NLOS_CL]; // Get the Clutter Loss for
+                                                                        // the Ka Band
     }
 
-  //Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
-  if((elev_angle < 10 && m_frequency>1e9)  || m_frequency>=10e9) 
-  {
-    int m_rounded_frequency = round(m_frequency/10e8);
-    loss += atmosphericAbsorption[m_rounded_frequency]/sin(elev_angle*(M_PI/180));
-  }
+    // Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
+    if ((elev_angle < 10 && m_frequency > 1e9) || m_frequency >= 10e9)
+    {
+        int m_rounded_frequency = round(m_frequency / 10e8);
+        loss += atmosphericAbsorption[m_rounded_frequency] / sin(elev_angle * (M_PI / 180));
+    }
 
-  //Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
-  if(m_frequency<6e9)
-  {
-    loss += 6.22/(pow(m_frequency/1e9,1.5));
-  }
+    // Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
+    if (m_frequency < 6e9)
+    {
+        loss += 6.22 / (pow(m_frequency / 1e9, 1.5));
+    }
 
-  //Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
-  if(m_frequency>6e9)
-  {
-    loss += troposphericScintillationLoss.at(elev_angle_quantized);
-  }
+    // Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
+    if (m_frequency > 6e9)
+    {
+        loss += troposphericScintillationLoss.at(elev_angle_quantized);
+    }
 
-  NS_LOG_DEBUG ("Loss " << loss);
-  return loss;
+    NS_LOG_DEBUG("Loss " << loss);
+    return loss;
 }
 
 double
-ThreeGppNTNUrbanPropagationLossModel::GetShadowingStd (Ptr<MobilityModel> a, Ptr<MobilityModel> b, ChannelCondition::LosConditionValue cond) const
+ThreeGppNTNUrbanPropagationLossModel::GetShadowingStd(
+    Ptr<MobilityModel> a,
+    Ptr<MobilityModel> b,
+    ChannelCondition::LosConditionValue cond) const
 {
-  NS_LOG_FUNCTION (this);
-  double shadowingStd;
-  
-  std::string freq_band = (m_frequency<13.0e9) ? "S" : "Ka";
+    NS_LOG_FUNCTION(this);
+    double shadowingStd;
 
-  double elev_angle = 0;
+    std::string freq_band = (m_frequency < 13.0e9) ? "S" : "Ka";
 
-  Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
-  Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
-      
-  if(DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
-     DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(b))) //check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
-     {
-        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
-        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+    double elev_angle = 0;
 
-        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
+    Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
+    Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
+
+    if (DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
+        DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(
+            b))) // check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
+    {
+        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
+        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+
+        if (aNTNMob->GetGeographicPosition().z <
+            bNTNMob->GetGeographicPosition().z) // b is the HAPS/Satellite
         {
-          elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
+            elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
-        else //a is the HAPS/Satellite
+        else // a is the HAPS/Satellite
         {
-          elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
+            elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
         }
     }
-  else
+    else
     {
-      NS_FATAL_ERROR ("Mobility Models needs to be of type Geocentric for NTN scenarios");
+        NS_FATAL_ERROR("Mobility Models needs to be of type Geocentric for NTN scenarios");
     }
 
-  int elev_angle_quantized = (elev_angle<10) ? 10 : round(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90..
-  NS_ASSERT_MSG ((elev_angle_quantized >= 10)&&(elev_angle_quantized <=90), "Invalid elevation angle!");
+    int elev_angle_quantized =
+        (elev_angle < 10)
+            ? 10
+            : round(elev_angle / 10) *
+                  10; // Round the elevation angle into a two-digits integer between 10 and 90..
+    NS_ASSERT_MSG((elev_angle_quantized >= 10) && (elev_angle_quantized <= 90),
+                  "Invalid elevation angle!");
 
-  //Assign Shadwoing Standard Deviation according to table 6.6.2-1
-  if (cond == ChannelCondition::LosConditionValue::LOS && freq_band == "S")
+    // Assign Shadwoing Standard Deviation according to table 6.6.2-1
+    if (cond == ChannelCondition::LosConditionValue::LOS && freq_band == "S")
     {
-      shadowingStd = (*m_SFCL_Urban).at(elev_angle_quantized)[SFCL_params::S_LOS_sigF];
+        shadowingStd = (*m_SFCL_Urban).at(elev_angle_quantized)[SFCL_params::S_LOS_sigF];
     }
-  else if (cond == ChannelCondition::LosConditionValue::LOS && freq_band == "Ka")
+    else if (cond == ChannelCondition::LosConditionValue::LOS && freq_band == "Ka")
     {
-      shadowingStd = (*m_SFCL_Urban).at(elev_angle_quantized)[SFCL_params::Ka_LOS_sigF];
+        shadowingStd = (*m_SFCL_Urban).at(elev_angle_quantized)[SFCL_params::Ka_LOS_sigF];
     }
-  else if (cond == ChannelCondition::LosConditionValue::NLOS && freq_band == "S")
+    else if (cond == ChannelCondition::LosConditionValue::NLOS && freq_band == "S")
     {
-      shadowingStd = (*m_SFCL_Urban).at(elev_angle_quantized)[SFCL_params::S_NLOS_sigF]; 
+        shadowingStd = (*m_SFCL_Urban).at(elev_angle_quantized)[SFCL_params::S_NLOS_sigF];
     }
-  else if (cond == ChannelCondition::LosConditionValue::NLOS && freq_band == "Ka")
+    else if (cond == ChannelCondition::LosConditionValue::NLOS && freq_band == "Ka")
     {
-      shadowingStd = (*m_SFCL_Urban).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_sigF];
+        shadowingStd = (*m_SFCL_Urban).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_sigF];
     }
-  else
+    else
     {
-      NS_FATAL_ERROR ("Unknown channel condition");
+        NS_FATAL_ERROR("Unknown channel condition");
     }
 
-  return shadowingStd;
+    return shadowingStd;
 }
 
 double
-ThreeGppNTNUrbanPropagationLossModel::GetShadowingCorrelationDistance (ChannelCondition::LosConditionValue cond) const
+ThreeGppNTNUrbanPropagationLossModel::GetShadowingCorrelationDistance(
+    ChannelCondition::LosConditionValue cond) const
 {
-  NS_LOG_FUNCTION (this);
-  double correlationDistance;
+    NS_LOG_FUNCTION(this);
+    double correlationDistance;
 
-  // See 3GPP TR 38.811, Table 6.7.2-3a/b and Table 6.7.2-3a/b
-  if (cond == ChannelCondition::LosConditionValue::LOS)
+    // See 3GPP TR 38.811, Table 6.7.2-3a/b and Table 6.7.2-3a/b
+    if (cond == ChannelCondition::LosConditionValue::LOS)
     {
-      correlationDistance = 37;
+        correlationDistance = 37;
     }
-  else if (cond == ChannelCondition::LosConditionValue::NLOS)
+    else if (cond == ChannelCondition::LosConditionValue::NLOS)
     {
-      correlationDistance = 50;
+        correlationDistance = 50;
     }
-  else
+    else
     {
-      NS_FATAL_ERROR ("Unknown channel condition");
+        NS_FATAL_ERROR("Unknown channel condition");
     }
 
-  return correlationDistance;
+    return correlationDistance;
 }
 
 // ------------------------------------------------------------------------- //
 
-NS_OBJECT_ENSURE_REGISTERED (ThreeGppNTNSuburbanPropagationLossModel);
+NS_OBJECT_ENSURE_REGISTERED(ThreeGppNTNSuburbanPropagationLossModel);
 
 TypeId
-ThreeGppNTNSuburbanPropagationLossModel::GetTypeId (void)
+ThreeGppNTNSuburbanPropagationLossModel::GetTypeId(void)
 {
-  static TypeId tid = TypeId ("ns3::ThreeGppNTNSuburbanPropagationLossModel")
-    .SetParent<ThreeGppPropagationLossModel> ()
-    .SetGroupName ("Propagation")
-    .AddConstructor<ThreeGppNTNSuburbanPropagationLossModel> ()
-  ;
-  return tid;
+    static TypeId tid = TypeId("ns3::ThreeGppNTNSuburbanPropagationLossModel")
+                            .SetParent<ThreeGppPropagationLossModel>()
+                            .SetGroupName("Propagation")
+                            .AddConstructor<ThreeGppNTNSuburbanPropagationLossModel>();
+    return tid;
 }
 
-ThreeGppNTNSuburbanPropagationLossModel::ThreeGppNTNSuburbanPropagationLossModel ()
-  : ThreeGppPropagationLossModel ()
+ThreeGppNTNSuburbanPropagationLossModel::ThreeGppNTNSuburbanPropagationLossModel()
+    : ThreeGppPropagationLossModel()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-  // set a default channel condition model
-  m_channelConditionModel = CreateObject<ThreeGppRmaChannelConditionModel> ();  //TODO: Needs NTN channel condition model
+    // set a default channel condition model
+    m_channelConditionModel =
+        CreateObject<ThreeGppRmaChannelConditionModel>(); // TODO: Needs NTN channel condition model
 
-  m_SFCL_SuburbanRural = &SFCL_SuburbanRural;
+    m_SFCL_SuburbanRural = &SFCL_SuburbanRural;
 }
 
-ThreeGppNTNSuburbanPropagationLossModel::~ThreeGppNTNSuburbanPropagationLossModel ()
+ThreeGppNTNSuburbanPropagationLossModel::~ThreeGppNTNSuburbanPropagationLossModel()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
 double
@@ -2046,258 +2137,297 @@ ThreeGppNTNSuburbanPropagationLossModel::GetO2iDistance2dIn() const
 }
 
 double
-ThreeGppNTNSuburbanPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppNTNSuburbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
+                                                    Ptr<MobilityModel> b) const
 {
-  NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
+    NS_LOG_FUNCTION(this);
+    NS_ASSERT_MSG(m_frequency <= 100.0e9,
+                  "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
 
-  double elev_angle = 0;
-  double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
+    double elev_angle = 0;
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
 
-  Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
-  Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
-      
-  if(DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
-     DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(b))) //check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
-     {
-        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
-        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+    Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
+    Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
 
-        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
-        {
-          elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
-        }
-        else //a is the HAPS/Satellite
-        {
-          elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
-        }
-    }
-  else
+    if (DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
+        DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(
+            b))) // check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
     {
-      NS_FATAL_ERROR ("Mobility Models needs to be of type Geocentric for NTN scenarios");
+        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
+        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+
+        if (aNTNMob->GetGeographicPosition().z <
+            bNTNMob->GetGeographicPosition().z) // b is the HAPS/Satellite
+        {
+            elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
+        }
+        else // a is the HAPS/Satellite
+        {
+            elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
+        }
+    }
+    else
+    {
+        NS_FATAL_ERROR("Mobility Models needs to be of type Geocentric for NTN scenarios");
     }
 
-  int elev_angle_quantized = (elev_angle<10) ? 10 : round(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90..
-  NS_ASSERT_MSG ((elev_angle_quantized >= 10)&&(elev_angle_quantized <=90), "Invalid elevation angle!");
-  //Check 3D distance?
-  //Check hBS and hUE?
-  //Others checks?
+    int elev_angle_quantized =
+        (elev_angle < 10)
+            ? 10
+            : round(elev_angle / 10) *
+                  10; // Round the elevation angle into a two-digits integer between 10 and 90..
+    NS_ASSERT_MSG((elev_angle_quantized >= 10) && (elev_angle_quantized <= 90),
+                  "Invalid elevation angle!");
+    // Check 3D distance?
+    // Check hBS and hUE?
+    // Others checks?
 
-  // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
-  double loss = 0;
-  loss = 32.45 + 20 * log10(m_frequency/1e9) + 20 * log10(distance3D); //Basic FSPL
+    // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
+    double loss = 0;
+    loss = 32.45 + 20 * log10(m_frequency / 1e9) + 20 * log10(distance3D); // Basic FSPL
 
-  //Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
-  if((elev_angle < 10 && m_frequency>1e9)  || m_frequency>=10e9) 
-  {
-    int m_rounded_frequency = round(m_frequency/10e8);
-    loss += atmosphericAbsorption[m_rounded_frequency]/sin(elev_angle*(M_PI/180));
-  }
+    // Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
+    if ((elev_angle < 10 && m_frequency > 1e9) || m_frequency >= 10e9)
+    {
+        int m_rounded_frequency = round(m_frequency / 10e8);
+        loss += atmosphericAbsorption[m_rounded_frequency] / sin(elev_angle * (M_PI / 180));
+    }
 
-  //Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
-  if(m_frequency<6e9)
-  {
-    loss += 6.22/(pow(m_frequency/1e9,1.5));
-  }
+    // Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
+    if (m_frequency < 6e9)
+    {
+        loss += 6.22 / (pow(m_frequency / 1e9, 1.5));
+    }
 
-  //Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
-  if(m_frequency>6e9)
-  {
-    loss += troposphericScintillationLoss.at(elev_angle_quantized);
-  }
+    // Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
+    if (m_frequency > 6e9)
+    {
+        loss += troposphericScintillationLoss.at(elev_angle_quantized);
+    }
 
-  NS_LOG_DEBUG ("Loss " << loss);
+    NS_LOG_DEBUG("Loss " << loss);
 
-  return loss;
+    return loss;
 }
 
 double
-ThreeGppNTNSuburbanPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppNTNSuburbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
+                                                     Ptr<MobilityModel> b) const
 {
-  NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
-  double elev_angle = 0;
-  double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
+    NS_LOG_FUNCTION(this);
+    NS_ASSERT_MSG(m_frequency <= 100.0e9,
+                  "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
+    double elev_angle = 0;
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
 
-  Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
-  Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
-      
-  if(DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
-     DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(b))) //check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
-     {
-        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
-        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+    Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
+    Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
 
-        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
+    if (DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
+        DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(
+            b))) // check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
+    {
+        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
+        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+
+        if (aNTNMob->GetGeographicPosition().z <
+            bNTNMob->GetGeographicPosition().z) // b is the HAPS/Satellite
         {
-          elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
+            elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
-        else //a is the HAPS/Satellite
+        else // a is the HAPS/Satellite
         {
-          elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
+            elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
         }
     }
-  else
+    else
     {
-      NS_FATAL_ERROR ("Mobility Models needs to be of type Geocentric for NTN scenarios");
+        NS_FATAL_ERROR("Mobility Models needs to be of type Geocentric for NTN scenarios");
     }
 
-  int elev_angle_quantized = (elev_angle<10) ? 10 : round(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90..
-  NS_ASSERT_MSG ((elev_angle_quantized >= 10)&&(elev_angle_quantized <=90), "Invalid elevation angle!");
-  //Check 3D distance?
-  //Check hBS and hUE?
-  //Others checks?
+    int elev_angle_quantized =
+        (elev_angle < 10)
+            ? 10
+            : round(elev_angle / 10) *
+                  10; // Round the elevation angle into a two-digits integer between 10 and 90..
+    NS_ASSERT_MSG((elev_angle_quantized >= 10) && (elev_angle_quantized <= 90),
+                  "Invalid elevation angle!");
+    // Check 3D distance?
+    // Check hBS and hUE?
+    // Others checks?
 
-  // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
-  double loss = 0;
-  loss = 32.45 + 20 * log10(m_frequency/1e9) + 20 * log10(distance3D); //Basic FSPL
+    // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
+    double loss = 0;
+    loss = 32.45 + 20 * log10(m_frequency / 1e9) + 20 * log10(distance3D); // Basic FSPL
 
-  //Apply Clutter Loss
-  if(m_frequency<13.0e9)
+    // Apply Clutter Loss
+    if (m_frequency < 13.0e9)
     {
-      loss += (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::S_NLOS_CL]; //Get the Clutter Loss for the S Band
+        loss += (*m_SFCL_SuburbanRural)
+                    .at(elev_angle_quantized)[SFCL_params::S_NLOS_CL]; // Get the Clutter Loss for
+                                                                       // the S Band
     }
-  else
+    else
     {
-      loss += (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_CL]; //Get the Clutter Loss for the Ka Band
+        loss += (*m_SFCL_SuburbanRural)
+                    .at(elev_angle_quantized)[SFCL_params::Ka_NLOS_CL]; // Get the Clutter Loss for
+                                                                        // the Ka Band
     }
 
-  //Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
-  if((elev_angle < 10 && m_frequency>1e9)  || m_frequency>=10e9) 
-  {
-    int m_rounded_frequency = round(m_frequency/10e8);
-    loss += atmosphericAbsorption[m_rounded_frequency]/sin(elev_angle*(M_PI/180));
-  }
+    // Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
+    if ((elev_angle < 10 && m_frequency > 1e9) || m_frequency >= 10e9)
+    {
+        int m_rounded_frequency = round(m_frequency / 10e8);
+        loss += atmosphericAbsorption[m_rounded_frequency] / sin(elev_angle * (M_PI / 180));
+    }
 
-  //Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
-  if(m_frequency<6e9)
-  {
-    loss += 6.22/(pow(m_frequency/1e9,1.5));
-  }
+    // Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
+    if (m_frequency < 6e9)
+    {
+        loss += 6.22 / (pow(m_frequency / 1e9, 1.5));
+    }
 
-  //Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
-  if(m_frequency>6e9)
-  {
-    loss += troposphericScintillationLoss.at(elev_angle_quantized);
-  }
+    // Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
+    if (m_frequency > 6e9)
+    {
+        loss += troposphericScintillationLoss.at(elev_angle_quantized);
+    }
 
-  NS_LOG_DEBUG ("Loss " << loss);
-  return loss;
+    NS_LOG_DEBUG("Loss " << loss);
+    return loss;
 }
 
 double
-ThreeGppNTNSuburbanPropagationLossModel::GetShadowingStd (Ptr<MobilityModel> a, Ptr<MobilityModel> b, ChannelCondition::LosConditionValue cond) const
+ThreeGppNTNSuburbanPropagationLossModel::GetShadowingStd(
+    Ptr<MobilityModel> a,
+    Ptr<MobilityModel> b,
+    ChannelCondition::LosConditionValue cond) const
 {
-  NS_LOG_FUNCTION (this);
-  double shadowingStd;
-  
-  std::string freq_band = (m_frequency<13.0e9) ? "S" : "Ka";
+    NS_LOG_FUNCTION(this);
+    double shadowingStd;
 
-  double elev_angle = 0;
+    std::string freq_band = (m_frequency < 13.0e9) ? "S" : "Ka";
 
-  Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
-  Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
-      
-  if(DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
-     DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(b))) //check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
-     {
-        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
-        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+    double elev_angle = 0;
 
-        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
+    Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
+    Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
+
+    if (DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
+        DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(
+            b))) // check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
+    {
+        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
+        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+
+        if (aNTNMob->GetGeographicPosition().z <
+            bNTNMob->GetGeographicPosition().z) // b is the HAPS/Satellite
         {
-          elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
+            elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
-        else //a is the HAPS/Satellite
+        else // a is the HAPS/Satellite
         {
-          elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
+            elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
         }
     }
-  else
+    else
     {
-      NS_FATAL_ERROR ("Mobility Models needs to be of type Geocentric for NTN scenarios");
+        NS_FATAL_ERROR("Mobility Models needs to be of type Geocentric for NTN scenarios");
     }
 
-  int elev_angle_quantized = (elev_angle<10) ? 10 : round(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90..
-  NS_ASSERT_MSG ((elev_angle_quantized >= 10)&&(elev_angle_quantized <=90), "Invalid elevation angle!");
+    int elev_angle_quantized =
+        (elev_angle < 10)
+            ? 10
+            : round(elev_angle / 10) *
+                  10; // Round the elevation angle into a two-digits integer between 10 and 90..
+    NS_ASSERT_MSG((elev_angle_quantized >= 10) && (elev_angle_quantized <= 90),
+                  "Invalid elevation angle!");
 
-  //Assign Shadwoing Standard Deviation according to table 6.6.2-1
-  if (cond == ChannelCondition::LosConditionValue::LOS && freq_band == "S")
+    // Assign Shadwoing Standard Deviation according to table 6.6.2-1
+    if (cond == ChannelCondition::LosConditionValue::LOS && freq_band == "S")
     {
-      shadowingStd = (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::S_LOS_sigF];
+        shadowingStd = (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::S_LOS_sigF];
     }
-  else if (cond == ChannelCondition::LosConditionValue::LOS && freq_band == "Ka")
+    else if (cond == ChannelCondition::LosConditionValue::LOS && freq_band == "Ka")
     {
-      shadowingStd = (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::Ka_LOS_sigF];
+        shadowingStd = (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::Ka_LOS_sigF];
     }
-  else if (cond == ChannelCondition::LosConditionValue::NLOS && freq_band == "S")
+    else if (cond == ChannelCondition::LosConditionValue::NLOS && freq_band == "S")
     {
-      shadowingStd = (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::S_NLOS_sigF]; 
+        shadowingStd = (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::S_NLOS_sigF];
     }
-  else if (cond == ChannelCondition::LosConditionValue::NLOS && freq_band == "Ka")
+    else if (cond == ChannelCondition::LosConditionValue::NLOS && freq_band == "Ka")
     {
-      shadowingStd = (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_sigF];
+        shadowingStd = (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_sigF];
     }
-  else
+    else
     {
-      NS_FATAL_ERROR ("Unknown channel condition");
+        NS_FATAL_ERROR("Unknown channel condition");
     }
 
-  return shadowingStd;
+    return shadowingStd;
 }
 
 double
-ThreeGppNTNSuburbanPropagationLossModel::GetShadowingCorrelationDistance (ChannelCondition::LosConditionValue cond) const
+ThreeGppNTNSuburbanPropagationLossModel::GetShadowingCorrelationDistance(
+    ChannelCondition::LosConditionValue cond) const
 {
-  NS_LOG_FUNCTION (this);
-  double correlationDistance;
+    NS_LOG_FUNCTION(this);
+    double correlationDistance;
 
-  // See 3GPP TR 38.811, Table 6.7.2-5a/b and Table 6.7.2-6a/b
-  if (cond == ChannelCondition::LosConditionValue::LOS)
+    // See 3GPP TR 38.811, Table 6.7.2-5a/b and Table 6.7.2-6a/b
+    if (cond == ChannelCondition::LosConditionValue::LOS)
     {
-      correlationDistance = 37;
+        correlationDistance = 37;
     }
-  else if (cond == ChannelCondition::LosConditionValue::NLOS)
+    else if (cond == ChannelCondition::LosConditionValue::NLOS)
     {
-      correlationDistance = 50;
+        correlationDistance = 50;
     }
-  else
+    else
     {
-      NS_FATAL_ERROR ("Unknown channel condition");
+        NS_FATAL_ERROR("Unknown channel condition");
     }
 
-  return correlationDistance;
+    return correlationDistance;
 }
 
 // ------------------------------------------------------------------------- //
 
-NS_OBJECT_ENSURE_REGISTERED (ThreeGppNTNRuralPropagationLossModel);
+NS_OBJECT_ENSURE_REGISTERED(ThreeGppNTNRuralPropagationLossModel);
 
 TypeId
-ThreeGppNTNRuralPropagationLossModel::GetTypeId (void)
+ThreeGppNTNRuralPropagationLossModel::GetTypeId(void)
 {
-  static TypeId tid = TypeId ("ns3::ThreeGppNTNRuralPropagationLossModel")
-    .SetParent<ThreeGppPropagationLossModel> ()
-    .SetGroupName ("Propagation")
-    .AddConstructor<ThreeGppNTNRuralPropagationLossModel> ()
-  ;
-  return tid;
+    static TypeId tid = TypeId("ns3::ThreeGppNTNRuralPropagationLossModel")
+                            .SetParent<ThreeGppPropagationLossModel>()
+                            .SetGroupName("Propagation")
+                            .AddConstructor<ThreeGppNTNRuralPropagationLossModel>();
+    return tid;
 }
 
-ThreeGppNTNRuralPropagationLossModel::ThreeGppNTNRuralPropagationLossModel ()
-  : ThreeGppPropagationLossModel ()
+ThreeGppNTNRuralPropagationLossModel::ThreeGppNTNRuralPropagationLossModel()
+    : ThreeGppPropagationLossModel()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-  // set a default channel condition model
-  m_channelConditionModel = CreateObject<ThreeGppRmaChannelConditionModel> ();  //TODO: Needs NTN channel condition model
+    // set a default channel condition model
+    m_channelConditionModel =
+        CreateObject<ThreeGppRmaChannelConditionModel>(); // TODO: Needs NTN channel condition model
 
-  m_SFCL_SuburbanRural = &SFCL_SuburbanRural;
+    m_SFCL_SuburbanRural = &SFCL_SuburbanRural;
 }
 
-ThreeGppNTNRuralPropagationLossModel::~ThreeGppNTNRuralPropagationLossModel ()
+ThreeGppNTNRuralPropagationLossModel::~ThreeGppNTNRuralPropagationLossModel()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
 double
@@ -2307,228 +2437,265 @@ ThreeGppNTNRuralPropagationLossModel::GetO2iDistance2dIn() const
 }
 
 double
-ThreeGppNTNRuralPropagationLossModel::GetLossLos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppNTNRuralPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
-  NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
+    NS_LOG_FUNCTION(this);
+    NS_ASSERT_MSG(m_frequency <= 100.0e9,
+                  "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
 
-  double elev_angle = 0;
-  double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
+    double elev_angle = 0;
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
 
-  Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
-  Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
-      
-  if(DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
-     DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(b))) //check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
-     {
-        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
-        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+    Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
+    Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
 
-        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
-        {
-          elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
-        }
-        else //a is the HAPS/Satellite
-        {
-          elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
-        }
-    }
-  else
+    if (DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
+        DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(
+            b))) // check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
     {
-      NS_FATAL_ERROR ("Mobility Models needs to be of type Geocentric for NTN scenarios");
+        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
+        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+
+        if (aNTNMob->GetGeographicPosition().z <
+            bNTNMob->GetGeographicPosition().z) // b is the HAPS/Satellite
+        {
+            elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
+        }
+        else // a is the HAPS/Satellite
+        {
+            elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
+        }
     }
-  
-  NS_LOG_UNCOND("Elevation Angle: "<< elev_angle);
+    else
+    {
+        NS_FATAL_ERROR("Mobility Models needs to be of type Geocentric for NTN scenarios");
+    }
 
-  int elev_angle_quantized = (elev_angle<10) ? 10 : round(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90..
-  NS_ASSERT_MSG ((elev_angle_quantized >= 10)&&(elev_angle_quantized <=90), "Invalid elevation angle!");
-  //Check 3D distance?
-  //Check hBS and hUE?
-  //Others checks?
+    NS_LOG_UNCOND("Elevation Angle: " << elev_angle);
 
-  // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
-  double loss = 0;
-  loss = 32.45 + 20 * log10(m_frequency/1e9) + 20 * log10(distance3D); //Basic FSPL
+    int elev_angle_quantized =
+        (elev_angle < 10)
+            ? 10
+            : round(elev_angle / 10) *
+                  10; // Round the elevation angle into a two-digits integer between 10 and 90..
+    NS_ASSERT_MSG((elev_angle_quantized >= 10) && (elev_angle_quantized <= 90),
+                  "Invalid elevation angle!");
+    // Check 3D distance?
+    // Check hBS and hUE?
+    // Others checks?
 
-  //Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
-  if((elev_angle < 10 && m_frequency>1e9)  || m_frequency>=10e9) 
-  {
-    int m_rounded_frequency = round(m_frequency/10e8);
-    loss += atmosphericAbsorption[m_rounded_frequency]/sin(elev_angle*(M_PI/180));
-  }
+    // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
+    double loss = 0;
+    loss = 32.45 + 20 * log10(m_frequency / 1e9) + 20 * log10(distance3D); // Basic FSPL
 
-  //Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
-  if(m_frequency<6e9)
-  {
-    loss += 6.22/(pow(m_frequency/1e9,1.5));
-  }
+    // Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
+    if ((elev_angle < 10 && m_frequency > 1e9) || m_frequency >= 10e9)
+    {
+        int m_rounded_frequency = round(m_frequency / 10e8);
+        loss += atmosphericAbsorption[m_rounded_frequency] / sin(elev_angle * (M_PI / 180));
+    }
 
-  //Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
-  if(m_frequency>6e9)
-  {
-    loss += troposphericScintillationLoss.at(elev_angle_quantized);
-  }
+    // Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
+    if (m_frequency < 6e9)
+    {
+        loss += 6.22 / (pow(m_frequency / 1e9, 1.5));
+    }
 
-  NS_LOG_DEBUG ("Loss " << loss);
-  return loss;
+    // Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
+    if (m_frequency > 6e9)
+    {
+        loss += troposphericScintillationLoss.at(elev_angle_quantized);
+    }
+
+    NS_LOG_DEBUG("Loss " << loss);
+    return loss;
 }
 
 double
-ThreeGppNTNRuralPropagationLossModel::GetLossNlos (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+ThreeGppNTNRuralPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
-  NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_frequency <= 100.0e9, "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
-  double elev_angle = 0;
-  double distance3D = CalculateDistance (a->GetPosition (), b->GetPosition ());
+    NS_LOG_FUNCTION(this);
+    NS_ASSERT_MSG(m_frequency <= 100.0e9,
+                  "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
+    double elev_angle = 0;
+    double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
 
-  Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
-  Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
-      
-  if(DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
-     DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(b))) //check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
-     {
-        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
-        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+    Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
+    Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
 
-        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
+    if (DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
+        DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(
+            b))) // check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
+    {
+        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
+        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+
+        if (aNTNMob->GetGeographicPosition().z <
+            bNTNMob->GetGeographicPosition().z) // b is the HAPS/Satellite
         {
-          elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
+            elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
-        else //a is the HAPS/Satellite
+        else // a is the HAPS/Satellite
         {
-          elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
+            elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
         }
     }
-  else
+    else
     {
-      NS_FATAL_ERROR ("Mobility Models needs to be of type Geocentric for NTN scenarios");
+        NS_FATAL_ERROR("Mobility Models needs to be of type Geocentric for NTN scenarios");
     }
 
-  int elev_angle_quantized = (elev_angle<10) ? 10 : round(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90..
-  NS_ASSERT_MSG ((elev_angle_quantized >= 10)&&(elev_angle_quantized <=90), "Invalid elevation angle!");
-  //Check 3D distance?
-  //Check hBS and hUE?
-  //Others checks?
+    int elev_angle_quantized =
+        (elev_angle < 10)
+            ? 10
+            : round(elev_angle / 10) *
+                  10; // Round the elevation angle into a two-digits integer between 10 and 90..
+    NS_ASSERT_MSG((elev_angle_quantized >= 10) && (elev_angle_quantized <= 90),
+                  "Invalid elevation angle!");
+    // Check 3D distance?
+    // Check hBS and hUE?
+    // Others checks?
 
-  // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
-  double loss = 0;
-  loss = 32.45 + 20 * log10(m_frequency/1e9) + 20 * log10(distance3D); //Basic FSPL
+    // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
+    double loss = 0;
+    loss = 32.45 + 20 * log10(m_frequency / 1e9) + 20 * log10(distance3D); // Basic FSPL
 
-  //Apply Clutter Loss
-  if(m_frequency<13.0e9)
+    // Apply Clutter Loss
+    if (m_frequency < 13.0e9)
     {
-      loss += (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::S_NLOS_CL]; //Get the Clutter Loss for the S Band
+        loss += (*m_SFCL_SuburbanRural)
+                    .at(elev_angle_quantized)[SFCL_params::S_NLOS_CL]; // Get the Clutter Loss for
+                                                                       // the S Band
     }
-  else
+    else
     {
-      loss += (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_CL]; //Get the Clutter Loss for the Ka Band
+        loss += (*m_SFCL_SuburbanRural)
+                    .at(elev_angle_quantized)[SFCL_params::Ka_NLOS_CL]; // Get the Clutter Loss for
+                                                                        // the Ka Band
     }
 
-  //Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
-  if((elev_angle < 10 && m_frequency>1e9)  || m_frequency>=10e9) 
-  {
-    int m_rounded_frequency = round(m_frequency/10e8);
-    loss += atmosphericAbsorption[m_rounded_frequency]/sin(elev_angle*(M_PI/180));
-  }
+    // Apply Atmospheric Absorption Loss 3GPP 38.811 6.6.4
+    if ((elev_angle < 10 && m_frequency > 1e9) || m_frequency >= 10e9)
+    {
+        int m_rounded_frequency = round(m_frequency / 10e8);
+        loss += atmosphericAbsorption[m_rounded_frequency] / sin(elev_angle * (M_PI / 180));
+    }
 
-  //Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
-  if(m_frequency<6e9)
-  {
-    loss += 6.22/(pow(m_frequency/1e9,1.5));
-  }
+    // Apply Ionospheric Scintillation Loss 3GPP 28.811 6.6.6.1-4
+    if (m_frequency < 6e9)
+    {
+        loss += 6.22 / (pow(m_frequency / 1e9, 1.5));
+    }
 
-  //Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
-  if(m_frequency>6e9)
-  {
-    loss += troposphericScintillationLoss.at(elev_angle_quantized);
-  }
+    // Apply Troposhperic Scintillation Loss 3GPP 28.811 6.6.6.2
+    if (m_frequency > 6e9)
+    {
+        loss += troposphericScintillationLoss.at(elev_angle_quantized);
+    }
 
-  NS_LOG_DEBUG ("Loss " << loss);
-  return loss;
+    NS_LOG_DEBUG("Loss " << loss);
+    return loss;
 }
 
 double
-ThreeGppNTNRuralPropagationLossModel::GetShadowingStd (Ptr<MobilityModel> a, Ptr<MobilityModel> b, ChannelCondition::LosConditionValue cond) const
+ThreeGppNTNRuralPropagationLossModel::GetShadowingStd(
+    Ptr<MobilityModel> a,
+    Ptr<MobilityModel> b,
+    ChannelCondition::LosConditionValue cond) const
 {
-  NS_LOG_FUNCTION (this);
-  double shadowingStd;
-  
-  std::string freq_band = (m_frequency<13.0e9) ? "S" : "Ka";
+    NS_LOG_FUNCTION(this);
+    double shadowingStd;
 
-  double elev_angle = 0;
+    std::string freq_band = (m_frequency < 13.0e9) ? "S" : "Ka";
 
-  Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
-  Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
-      
-  if(DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
-     DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(b))) //check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
-     {
-        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
-        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+    double elev_angle = 0;
 
-        if(aNTNMob->GetGeographicPosition().z < bNTNMob->GetGeographicPosition().z) //b is the HAPS/Satellite
+    Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
+    Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
+
+    if (DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(a)) &&
+        DynamicCast<GeocentricConstantPositionMobilityModel>(ConstCast<MobilityModel>(
+            b))) // check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
+    {
+        Ptr<GeocentricConstantPositionMobilityModel> aNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
+        Ptr<GeocentricConstantPositionMobilityModel> bNTNMob =
+            DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
+
+        if (aNTNMob->GetGeographicPosition().z <
+            bNTNMob->GetGeographicPosition().z) // b is the HAPS/Satellite
         {
-          elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
+            elev_angle = aNTNMob->GetElevationAngle(bNTNMob);
         }
-        else //a is the HAPS/Satellite
+        else // a is the HAPS/Satellite
         {
-          elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
+            elev_angle = bNTNMob->GetElevationAngle(aNTNMob);
         }
     }
-  else
+    else
     {
-      NS_FATAL_ERROR ("Mobility Models needs to be of type Geocentric for NTN scenarios");
+        NS_FATAL_ERROR("Mobility Models needs to be of type Geocentric for NTN scenarios");
     }
 
-  int elev_angle_quantized = (elev_angle<10) ? 10 : round(elev_angle/10)*10; //Round the elevation angle into a two-digits integer between 10 and 90..
-  NS_ASSERT_MSG ((elev_angle_quantized >= 10)&&(elev_angle_quantized <=90), "Invalid elevation angle!");
+    int elev_angle_quantized =
+        (elev_angle < 10)
+            ? 10
+            : round(elev_angle / 10) *
+                  10; // Round the elevation angle into a two-digits integer between 10 and 90..
+    NS_ASSERT_MSG((elev_angle_quantized >= 10) && (elev_angle_quantized <= 90),
+                  "Invalid elevation angle!");
 
-  //Assign Shadwoing Standard Deviation according to table 6.6.2-1
-  if (cond == ChannelCondition::LosConditionValue::LOS && freq_band == "S")
+    // Assign Shadwoing Standard Deviation according to table 6.6.2-1
+    if (cond == ChannelCondition::LosConditionValue::LOS && freq_band == "S")
     {
-      shadowingStd = (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::S_LOS_sigF];
+        shadowingStd = (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::S_LOS_sigF];
     }
-  else if (cond == ChannelCondition::LosConditionValue::LOS && freq_band == "Ka")
+    else if (cond == ChannelCondition::LosConditionValue::LOS && freq_band == "Ka")
     {
-      shadowingStd = (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::Ka_LOS_sigF];
+        shadowingStd = (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::Ka_LOS_sigF];
     }
-  else if (cond == ChannelCondition::LosConditionValue::NLOS && freq_band == "S")
+    else if (cond == ChannelCondition::LosConditionValue::NLOS && freq_band == "S")
     {
-      shadowingStd = (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::S_NLOS_sigF]; 
+        shadowingStd = (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::S_NLOS_sigF];
     }
-  else if (cond == ChannelCondition::LosConditionValue::NLOS && freq_band == "Ka")
+    else if (cond == ChannelCondition::LosConditionValue::NLOS && freq_band == "Ka")
     {
-      shadowingStd = (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_sigF];
+        shadowingStd = (*m_SFCL_SuburbanRural).at(elev_angle_quantized)[SFCL_params::Ka_NLOS_sigF];
     }
-  else
+    else
     {
-      NS_FATAL_ERROR ("Unknown channel condition");
+        NS_FATAL_ERROR("Unknown channel condition");
     }
 
-  return shadowingStd;
+    return shadowingStd;
 }
 
 double
-ThreeGppNTNRuralPropagationLossModel::GetShadowingCorrelationDistance (ChannelCondition::LosConditionValue cond) const
+ThreeGppNTNRuralPropagationLossModel::GetShadowingCorrelationDistance(
+    ChannelCondition::LosConditionValue cond) const
 {
-  NS_LOG_FUNCTION (this);
-  double correlationDistance;
+    NS_LOG_FUNCTION(this);
+    double correlationDistance;
 
-  // See 3GPP TR 38.811, Table 6.7.2-7a/b and Table 6.7.2-8a/b
-  if (cond == ChannelCondition::LosConditionValue::LOS)
+    // See 3GPP TR 38.811, Table 6.7.2-7a/b and Table 6.7.2-8a/b
+    if (cond == ChannelCondition::LosConditionValue::LOS)
     {
-      correlationDistance = 37;
+        correlationDistance = 37;
     }
-  else if (cond == ChannelCondition::LosConditionValue::NLOS)
+    else if (cond == ChannelCondition::LosConditionValue::NLOS)
     {
-      correlationDistance = 120;
+        correlationDistance = 120;
     }
-  else
+    else
     {
-      NS_FATAL_ERROR ("Unknown channel condition");
+        NS_FATAL_ERROR("Unknown channel condition");
     }
 
-  return correlationDistance;
+    return correlationDistance;
 }
 
 } // namespace ns3

@@ -792,34 +792,35 @@ class ThreeGppIndoorOpenOfficeChannelConditionModel : public ThreeGppChannelCond
  */
 class ThreeGppNTNDenseUrbanChannelConditionModel : public ThreeGppChannelConditionModel
 {
-public:
-  /**
-   * Get the type ID.
-   * \brief Get the type ID.
-   * \return the object TypeId
-   */
-  static TypeId GetTypeId (void);
+  public:
+    /**
+     * Get the type ID.
+     * \brief Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId(void);
 
-  /**
-   * Constructor for the ThreeGppNTNDenseUrbanChannelConditionModel class
-   */
-  ThreeGppNTNDenseUrbanChannelConditionModel ();
+    /**
+     * Constructor for the ThreeGppNTNDenseUrbanChannelConditionModel class
+     */
+    ThreeGppNTNDenseUrbanChannelConditionModel();
 
-  /**
-   * Destructor for the ThreeGppNTNDenseUrbanChannelConditionModel class
-   */
-  virtual ~ThreeGppNTNDenseUrbanChannelConditionModel () override;
+    /**
+     * Destructor for the ThreeGppNTNDenseUrbanChannelConditionModel class
+     */
+    virtual ~ThreeGppNTNDenseUrbanChannelConditionModel() override;
 
-private:
-  /**
-   * Compute the LOS probability as specified in Table 6.6.1-1 of 3GPP TR 38.811
-   * for the NTN Dense Urban scenario.
-   *
-   * \param a tx mobility model
-   * \param b rx mobility model
-   * \return the LOS probability
-   */
-  virtual double ComputePlos (Ptr<const MobilityModel> a, Ptr<const MobilityModel> b) const override;
+  private:
+    /**
+     * Compute the LOS probability as specified in Table 6.6.1-1 of 3GPP TR 38.811
+     * for the NTN Dense Urban scenario.
+     *
+     * \param a tx mobility model
+     * \param b rx mobility model
+     * \return the LOS probability
+     */
+    virtual double ComputePlos(Ptr<const MobilityModel> a,
+                               Ptr<const MobilityModel> b) const override;
 };
 
 /**
@@ -828,38 +829,39 @@ private:
  * \brief Computes the channel condition for the NTN Urban Scenario
  *
  * Computes the channel condition following the specifications for the
- * Indoor Mixed Office scenario reported in Table 6.6.1-1 of 3GPP TR 38.811 
+ * Indoor Mixed Office scenario reported in Table 6.6.1-1 of 3GPP TR 38.811
  */
 class ThreeGppNTNUrbanChannelConditionModel : public ThreeGppChannelConditionModel
 {
-public:
-  /**
-   * Get the type ID.
-   * \brief Get the type ID.
-   * \return the object TypeId
-   */
-  static TypeId GetTypeId (void);
+  public:
+    /**
+     * Get the type ID.
+     * \brief Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId(void);
 
-  /**
-   * Constructor for the ThreeGppNTNUrbanChannelConditionModel class
-   */
-  ThreeGppNTNUrbanChannelConditionModel ();
+    /**
+     * Constructor for the ThreeGppNTNUrbanChannelConditionModel class
+     */
+    ThreeGppNTNUrbanChannelConditionModel();
 
-  /**
-   * Destructor for the ThreeGppNTNUrbanChannelConditionModel class
-   */
-  virtual ~ThreeGppNTNUrbanChannelConditionModel () override;
+    /**
+     * Destructor for the ThreeGppNTNUrbanChannelConditionModel class
+     */
+    virtual ~ThreeGppNTNUrbanChannelConditionModel() override;
 
-private:
-  /**
-   * Compute the LOS probability as specified in Table 6.6.1-1 of 3GPP TR 38.811
-   * for the NTN Dense Urban scenario.
-   *
-   * \param a tx mobility model
-   * \param b rx mobility model
-   * \return the LOS probability
-   */
-  virtual double ComputePlos (Ptr<const MobilityModel> a, Ptr<const MobilityModel> b) const override;
+  private:
+    /**
+     * Compute the LOS probability as specified in Table 6.6.1-1 of 3GPP TR 38.811
+     * for the NTN Dense Urban scenario.
+     *
+     * \param a tx mobility model
+     * \param b rx mobility model
+     * \return the LOS probability
+     */
+    virtual double ComputePlos(Ptr<const MobilityModel> a,
+                               Ptr<const MobilityModel> b) const override;
 };
 
 /**
@@ -868,38 +870,39 @@ private:
  * \brief Computes the channel condition for the NTN Suburban Scenario
  *
  * Computes the channel condition following the specifications for the
- * Indoor Mixed Office scenario reported in Table 6.6.1-1 of 3GPP TR 38.811 
+ * Indoor Mixed Office scenario reported in Table 6.6.1-1 of 3GPP TR 38.811
  */
 class ThreeGppNTNSuburbanChannelConditionModel : public ThreeGppChannelConditionModel
 {
-public:
-  /**
-   * Get the type ID.
-   * \brief Get the type ID.
-   * \return the object TypeId
-   */
-  static TypeId GetTypeId (void);
+  public:
+    /**
+     * Get the type ID.
+     * \brief Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId(void);
 
-  /**
-   * Constructor for the ThreeGppNTNSuburbanChannelConditionModel class
-   */
-  ThreeGppNTNSuburbanChannelConditionModel ();
+    /**
+     * Constructor for the ThreeGppNTNSuburbanChannelConditionModel class
+     */
+    ThreeGppNTNSuburbanChannelConditionModel();
 
-  /**
-   * Destructor for the ThreeGppNTNSuburbanChannelConditionModel class
-   */
-  virtual ~ThreeGppNTNSuburbanChannelConditionModel () override;
+    /**
+     * Destructor for the ThreeGppNTNSuburbanChannelConditionModel class
+     */
+    virtual ~ThreeGppNTNSuburbanChannelConditionModel() override;
 
-private:
-  /**
-   * Compute the LOS probability as specified in Table 6.6.1-1 of 3GPP TR 38.811
-   * for the NTN Dense Urban scenario.
-   *
-   * \param a tx mobility model
-   * \param b rx mobility model
-   * \return the LOS probability
-   */
-  virtual double ComputePlos (Ptr<const MobilityModel> a, Ptr<const MobilityModel> b) const override;
+  private:
+    /**
+     * Compute the LOS probability as specified in Table 6.6.1-1 of 3GPP TR 38.811
+     * for the NTN Dense Urban scenario.
+     *
+     * \param a tx mobility model
+     * \param b rx mobility model
+     * \return the LOS probability
+     */
+    virtual double ComputePlos(Ptr<const MobilityModel> a,
+                               Ptr<const MobilityModel> b) const override;
 };
 
 /**
@@ -908,38 +911,39 @@ private:
  * \brief Computes the channel condition for the NTN Rural Scenario
  *
  * Computes the channel condition following the specifications for the
- * Indoor Mixed Office scenario reported in Table 6.6.1-1 of 3GPP TR 38.811 
+ * Indoor Mixed Office scenario reported in Table 6.6.1-1 of 3GPP TR 38.811
  */
 class ThreeGppNTNRuralChannelConditionModel : public ThreeGppChannelConditionModel
 {
-public:
-  /**
-   * Get the type ID.
-   * \brief Get the type ID.
-   * \return the object TypeId
-   */
-  static TypeId GetTypeId (void);
+  public:
+    /**
+     * Get the type ID.
+     * \brief Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId(void);
 
-  /**
-   * Constructor for the ThreeGppNTNRuralChannelConditionModel class
-   */
-  ThreeGppNTNRuralChannelConditionModel ();
+    /**
+     * Constructor for the ThreeGppNTNRuralChannelConditionModel class
+     */
+    ThreeGppNTNRuralChannelConditionModel();
 
-  /**
-   * Destructor for the ThreeGppNTNRuralChannelConditionModel class
-   */
-  virtual ~ThreeGppNTNRuralChannelConditionModel () override;
+    /**
+     * Destructor for the ThreeGppNTNRuralChannelConditionModel class
+     */
+    virtual ~ThreeGppNTNRuralChannelConditionModel() override;
 
-private:
-  /**
-   * Compute the LOS probability as specified in Table 6.6.1-1 of 3GPP TR 38.811
-   * for the NTN Dense Urban scenario.
-   *
-   * \param a tx mobility model
-   * \param b rx mobility model
-   * \return the LOS probability
-   */
-  virtual double ComputePlos (Ptr<const MobilityModel> a, Ptr<const MobilityModel> b) const override;
+  private:
+    /**
+     * Compute the LOS probability as specified in Table 6.6.1-1 of 3GPP TR 38.811
+     * for the NTN Dense Urban scenario.
+     *
+     * \param a tx mobility model
+     * \param b rx mobility model
+     * \return the LOS probability
+     */
+    virtual double ComputePlos(Ptr<const MobilityModel> a,
+                               Ptr<const MobilityModel> b) const override;
 };
 
 } // namespace ns3

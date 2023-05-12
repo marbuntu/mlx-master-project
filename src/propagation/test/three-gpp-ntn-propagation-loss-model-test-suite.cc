@@ -22,8 +22,8 @@
 #include "ns3/config.h"
 #include "ns3/constant-position-mobility-model.h"
 #include "ns3/constant-velocity-mobility-model.h"
-#include "ns3/geocentric-constant-position-mobility-model.h"
 #include "ns3/double.h"
+#include "ns3/geocentric-constant-position-mobility-model.h"
 #include "ns3/log.h"
 #include "ns3/mobility-helper.h"
 #include "ns3/simulator.h"
@@ -77,14 +77,16 @@ class ThreeGppNTNDenseUrbanPropagationLossModelTestCase : public TestCase
     double m_tolerance;                    //!< tolerance
 };
 
-ThreeGppNTNDenseUrbanPropagationLossModelTestCase::ThreeGppNTNDenseUrbanPropagationLossModelTestCase()
+ThreeGppNTNDenseUrbanPropagationLossModelTestCase::
+    ThreeGppNTNDenseUrbanPropagationLossModelTestCase()
     : TestCase("Test for the ThreeNTNDenseUrbanPropagationLossModel class"),
       m_testVectors(),
       m_tolerance(5e-2)
 {
 }
 
-ThreeGppNTNDenseUrbanPropagationLossModelTestCase::~ThreeGppNTNDenseUrbanPropagationLossModelTestCase()
+ThreeGppNTNDenseUrbanPropagationLossModelTestCase::
+    ~ThreeGppNTNDenseUrbanPropagationLossModelTestCase()
 {
 }
 

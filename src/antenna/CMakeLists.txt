@@ -28,4 +28,5 @@ build_lib(
     test/test-cosine-antenna.cc
     test/test-parabolic-antenna.cc
     test/test-uniform-planar-array.cc
+    test/test-circular-aperture-antenna.cc
 )

@@ -53,8 +53,8 @@ Coordinate system
 
 There are many possible coordinate systems and possible translations between
 them.  |ns3| uses the Cartesian coordinate system and the geocentric Cartesian coordinate system, at the moment.
-The GeocentricConstantPositionMobilityModel adopts the geocentric Cartesian coordinates, while still implementing the Get/SetPosition methods, 
-which using the GeographicPosition class offers conversion to and form Cartesian coordinates. 
+The GeocentricConstantPositionMobilityModel adopts the geocentric Cartesian coordinates, while still implementing the Get/SetPosition methods,
+which using the GeographicPosition class offers conversion to and form Cartesian coordinates.
 Furthermore, the user can set the position of a node by the means of geographical coordinates thanks to the methods
 Get/SetGeographicPosition.
 
