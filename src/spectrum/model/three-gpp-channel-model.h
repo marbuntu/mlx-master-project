@@ -371,28 +371,31 @@ class ThreeGppChannelModel : public MatrixBasedChannelModel
     static const uint8_t R_INDEX = 4; //!< index of the R value in the m_nonSelfBlocking array
 
     const std::map<std::string, std::map<int, std::vector<float>>>*
-        m_NTNDenseUrbanLOS; // The nested map containing the threegpp value tables for the NTN Dense
+        m_NTNDenseUrbanLOS; //!< The nested map containing the threegpp value tables for the NTN
+                            //!< Dense
                             // Urban LOS scenario
     const std::map<std::string, std::map<int, std::vector<float>>>*
-        m_NTNDenseUrbanNLOS; // The nested map containing the threegpp value tables for the NTN
+        m_NTNDenseUrbanNLOS; //!< The nested map containing the threegpp value tables for the NTN
                              // Dense Urban NLOS scenario
     const std::map<std::string, std::map<int, std::vector<float>>>*
-        m_NTNUrbanLOS; // The nested map containing the threegpp value tables for the NTN Urban LOS
+        m_NTNUrbanLOS; //!< The nested map containing the threegpp value tables for the NTN Urban
+                       //!< LOS
                        // scenario
     const std::map<std::string, std::map<int, std::vector<float>>>*
-        m_NTNUrbanNLOS; // The nested map containing the threegpp value tables for the NTN Urban
+        m_NTNUrbanNLOS; //!< The nested map containing the threegpp value tables for the NTN Urban
                         // NLOS scenario
     const std::map<std::string, std::map<int, std::vector<float>>>*
-        m_NTNSuburbanLOS; // The nested map containing the threegpp value tables for the NTN
+        m_NTNSuburbanLOS; //!< The nested map containing the threegpp value tables for the NTN
                           // Suburban LOS scenario
     const std::map<std::string, std::map<int, std::vector<float>>>*
-        m_NTNSuburbanNLOS; // The nested map containing the threegpp value tables for the NTN
+        m_NTNSuburbanNLOS; //!< The nested map containing the threegpp value tables for the NTN
                            // Suburban NLOS scenario
     const std::map<std::string, std::map<int, std::vector<float>>>*
-        m_NTNRuralLOS; // The nested map containing the threegpp value tables for the NTN Rural LOS
+        m_NTNRuralLOS; //!< The nested map containing the threegpp value tables for the NTN Rural
+                       //!< LOS
                        // scenario
     const std::map<std::string, std::map<int, std::vector<float>>>*
-        m_NTNRuralNLOS; // The nested map containing the threegpp value tables for the NTN Rural
+        m_NTNRuralNLOS; //!< The nested map containing the threegpp value tables for the NTN Rural
                         // NLOS scenario
 };
 } // namespace ns3

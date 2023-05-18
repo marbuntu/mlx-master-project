@@ -110,7 +110,7 @@ class CircularApertureAntennaModel : public AntennaModel
     /**
      * \brief Set the antenna max gain
      *
-     * \param g the antenna max gain in dB
+     * \param gain the antenna max gain in dB
      */
     void SetMaxGain(double gain);
 
@@ -126,6 +126,8 @@ class CircularApertureAntennaModel : public AntennaModel
      *
      * \param a the position at which the gain need to be calculated with respect to the antenna
      * position
+     *
+     * \return the antenna gain at the specified Angles a
      */
     virtual double GetGainDb(Angles a) override;
 

@@ -769,9 +769,11 @@ class ThreeGppNTNDenseUrbanPropagationLossModel : public ThreeGppPropagationLoss
     virtual double GetShadowingCorrelationDistance(
         ChannelCondition::LosConditionValue cond) const override;
 
-    const std::map<int, std::vector<float>>*
-        m_SFCL_DenseUrban; // The map containing the Shadow Fading and Clutter Loss values for the
-                           // NTN Dense Urban scenario
+    /**
+     * \brief The nested map containing the Shadow Fading and
+     *        Clutter Loss values for the NTN Dense Urban scenario
+     */
+    const std::map<int, std::vector<float>>* m_SFCL_DenseUrban;
 };
 
 /**
@@ -860,9 +862,11 @@ class ThreeGppNTNUrbanPropagationLossModel : public ThreeGppPropagationLossModel
     virtual double GetShadowingCorrelationDistance(
         ChannelCondition::LosConditionValue cond) const override;
 
-    const std::map<int, std::vector<float>>*
-        m_SFCL_Urban; // The map containing the Shadow Fading and Clutter Loss values for the NTN
-                      // Urban scenario
+    /**
+     * \brief The nested map containing the Shadow Fading and
+     *        Clutter Loss values for the NTN Urban scenario
+     */
+    const std::map<int, std::vector<float>>* m_SFCL_Urban;
 };
 
 /**
@@ -952,9 +956,11 @@ class ThreeGppNTNSuburbanPropagationLossModel : public ThreeGppPropagationLossMo
     virtual double GetShadowingCorrelationDistance(
         ChannelCondition::LosConditionValue cond) const override;
 
-    const std::map<int, std::vector<float>>*
-        m_SFCL_SuburbanRural; // The map containing the Shadow Fading and Clutter Loss values for
-                              // the NTN Suburabn and Rural scenario
+    /**
+     * \brief The nested map containing the Shadow Fading and
+     *        Clutter Loss values for the NTN Suburban and Rural scenario
+     */
+    const std::map<int, std::vector<float>>* m_SFCL_SuburbanRural;
 };
 
 /**
@@ -1043,9 +1049,11 @@ class ThreeGppNTNRuralPropagationLossModel : public ThreeGppPropagationLossModel
     virtual double GetShadowingCorrelationDistance(
         ChannelCondition::LosConditionValue cond) const override;
 
-    const std::map<int, std::vector<float>>*
-        m_SFCL_SuburbanRural; // The map containing the Shadow Fading and Clutter Loss values for
-                              // the NTN Suburabn and Rural scenario
+    /**
+     * \brief The nested map containing the Shadow Fading and
+     *        Clutter Loss values for the NTN Suburban and Rural scenario
+     */
+    const std::map<int, std::vector<float>>* m_SFCL_SuburbanRural;
 };
 
 } // namespace ns3

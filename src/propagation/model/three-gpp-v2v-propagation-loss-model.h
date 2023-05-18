@@ -71,10 +71,8 @@ class ThreeGppV2vUrbanPropagationLossModel : public ThreeGppPropagationLossModel
     /**
      * \brief Computes the pathloss between a and b considering that the line of
      *        sight is not obstructed
-     * \param distance2D the 2D distance between tx and rx in meters
-     * \param distance3D the 3D distance between tx and rx in meters
-     * \param hUt the height of the UT in meters
-     * \param hBs the height of the BS in meters
+     * \param a mobility model of one of the two communicating nodes
+     * \param b mobility model of one of the two communicating nodes
      * \return pathloss value in dB
      */
     virtual double GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
@@ -99,10 +97,8 @@ class ThreeGppV2vUrbanPropagationLossModel : public ThreeGppPropagationLossModel
     /**
      * \brief Computes the pathloss between a and b considering that the line of
      *        sight is obstructed by a vehicle
-     * \param distance2D the 2D distance between tx and rx in meters
-     * \param distance3D the 3D distance between tx and rx in meters
-     * \param hUt the height of the UT in meters
-     * \param hBs the height of the BS in meters
+     * \param a mobility model of one of the two communicating nodes
+     * \param b mobility model of one of the two communicating nodes
      * \return pathloss value in dB
      */
     virtual double GetLossNlosv(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
@@ -110,27 +106,24 @@ class ThreeGppV2vUrbanPropagationLossModel : public ThreeGppPropagationLossModel
     /**
      * \brief Computes the pathloss between a and b considering that the line of
      *        sight is obstructed by a building
-     * \param distance2D the 2D distance between tx and rx in meters
-     * \param distance3D the 3D distance between tx and rx in meters
-     * \param hUt the height of the UT in meters
-     * \param hBs the height of the BS in meters
+     * \param a mobility model of one of the two communicating nodes
+     * \param b mobility model of one of the two communicating nodes
      * \return pathloss value in dB
      */
     virtual double GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
 
     /**
      * \brief Computes the additional loss due to an obstruction caused by a vehicle
-     * \param distance3D the 3D distance between tx and rx in meters
-     * \param hUt the height of the UT in meters
-     * \param hBs the height of the BS in meters
+     * \param a mobility model of one of the two communicating nodes
+     * \param b mobility model of one of the two communicating nodes
      * \return pathloss value in dB
      */
     double GetAdditionalNlosvLoss(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const;
 
     /**
      * \brief Returns the shadow fading standard deviation
-     * \param a tx mobility model
-     * \param b rx mobility model
+     * \param a mobility model of one of the two communicating nodes
+     * \param b mobility model of one of the two communicating nodes
      * \param cond the LOS/NLOS channel condition
      * \return shadowing std in dB
      */
@@ -181,10 +174,8 @@ class ThreeGppV2vHighwayPropagationLossModel : public ThreeGppV2vUrbanPropagatio
     /**
      * \brief Computes the pathloss between a and b considering that the line of
      *        sight is not obstructed
-     * \param distance2D the 2D distance between tx and rx in meters
-     * \param distance3D the 3D distance between tx and rx in meters
-     * \param hUt the height of the UT in meters
-     * \param hBs the height of the BS in meters
+     * \param a mobility model of one of the two communicating nodes
+     * \param b mobility model of one of the two communicating nodes
      * \return pathloss value in dB
      */
     virtual double GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;

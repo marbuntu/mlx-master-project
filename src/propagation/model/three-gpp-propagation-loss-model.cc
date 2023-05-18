@@ -1494,6 +1494,10 @@ const double atmosphericAbsorption[101] = {
     0.8000,   0.8029,   0.8112,  0.8243,  0.8416,  0.8625,  0.8864,  0.9127,  0.9408,   0.9701,
     1.0000};
 
+/**
+ * Map containing the Tropospheric attenuation in dB with 99% probability at 20 GHz in Toulouse
+ * used for tropospheric scintillation losses. From Table 6.6.6.2.1-1 of 3GPP TR 38.811.
+ */
 const std::map<int, float> troposphericScintillationLoss{
     {10, {1.08}},
     {20, {0.48}},

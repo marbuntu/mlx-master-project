@@ -99,11 +99,13 @@ GeocentricConstantPositionMobilityModel::SetPosition(const Vector& position)
     return DoSetPosition(position);
 }
 
-/**
- *  In order to for returned the position to work with the rest of ns-3,
- *  it is converted from geographic to topocentric using the GeograpicPositions method.
- *  The default reference point for conversion is lat=0, lon=0, altitude=0, but can be changed.
- */
+double
+GeocentricConstantPositionMobilityModel::GetDistanceFrom(
+    Ptr<const GeocentricConstantPositionMobilityModel> other) const
+{
+    return DoGetDistanceFrom(other);
+}
+
 Vector
 GeocentricConstantPositionMobilityModel::DoGetPosition(void) const
 {

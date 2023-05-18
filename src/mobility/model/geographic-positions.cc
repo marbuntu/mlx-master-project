@@ -47,10 +47,12 @@ static constexpr double EARTH_SEMIMAJOR_AXIS = 6378137;
 
 /// Earth's first eccentricity as defined by GRS80
 static constexpr double EARTH_GRS80_ECCENTRICITY = 0.0818191910428158;
+/// Earth's first flattening as defined by GRS80
 static constexpr double EARTH_GRS80_FLATTENING = 0.003352810681183637418;
 
 /// Earth's first eccentricity as defined by WGS84
 static constexpr double EARTH_WGS84_ECCENTRICITY = 0.0818191908426215;
+/// Earth's first flattening as defined by WGS84
 static constexpr double EARTH_WGS84_FLATTENING = 0.00335281;
 
 /// Conversion factor: degrees to radians
