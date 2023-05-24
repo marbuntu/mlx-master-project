@@ -725,7 +725,7 @@ class ThreeGppNTNDenseUrbanPropagationLossModel : public ThreeGppPropagationLoss
      * \brief Get the type ID.
      * \return the object TypeId
      */
-    static TypeId GetTypeId(void);
+    static TypeId GetTypeId();
 
     /**
      * Constructor
@@ -819,7 +819,7 @@ class ThreeGppNTNUrbanPropagationLossModel : public ThreeGppPropagationLossModel
      * \brief Get the type ID.
      * \return the object TypeId
      */
-    static TypeId GetTypeId(void);
+    static TypeId GetTypeId();
 
     /**
      * Constructor
@@ -912,7 +912,7 @@ class ThreeGppNTNSuburbanPropagationLossModel : public ThreeGppPropagationLossMo
      * \brief Get the type ID.
      * \return the object TypeId
      */
-    static TypeId GetTypeId(void);
+    static TypeId GetTypeId();
 
     /**
      * Constructor
@@ -1006,7 +1006,7 @@ class ThreeGppNTNRuralPropagationLossModel : public ThreeGppPropagationLossModel
      * \brief Get the type ID.
      * \return the object TypeId
      */
-    static TypeId GetTypeId(void);
+    static TypeId GetTypeId();
 
     /**
      * Constructor

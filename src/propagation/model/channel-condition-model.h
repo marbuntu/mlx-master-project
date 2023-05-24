@@ -798,7 +798,7 @@ class ThreeGppNTNDenseUrbanChannelConditionModel : public ThreeGppChannelConditi
      * \brief Get the type ID.
      * \return the object TypeId
      */
-    static TypeId GetTypeId(void);
+    static TypeId GetTypeId();
 
     /**
      * Constructor for the ThreeGppNTNDenseUrbanChannelConditionModel class
@@ -839,7 +839,7 @@ class ThreeGppNTNUrbanChannelConditionModel : public ThreeGppChannelConditionMod
      * \brief Get the type ID.
      * \return the object TypeId
      */
-    static TypeId GetTypeId(void);
+    static TypeId GetTypeId();
 
     /**
      * Constructor for the ThreeGppNTNUrbanChannelConditionModel class
@@ -880,7 +880,7 @@ class ThreeGppNTNSuburbanChannelConditionModel : public ThreeGppChannelCondition
      * \brief Get the type ID.
      * \return the object TypeId
      */
-    static TypeId GetTypeId(void);
+    static TypeId GetTypeId();
 
     /**
      * Constructor for the ThreeGppNTNSuburbanChannelConditionModel class
@@ -921,7 +921,7 @@ class ThreeGppNTNRuralChannelConditionModel : public ThreeGppChannelConditionMod
      * \brief Get the type ID.
      * \return the object TypeId
      */
-    static TypeId GetTypeId(void);
+    static TypeId GetTypeId();
 
     /**
      * Constructor for the ThreeGppNTNRuralChannelConditionModel class

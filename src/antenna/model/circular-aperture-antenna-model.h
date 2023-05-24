@@ -34,9 +34,9 @@ namespace ns3
 class CircularApertureAntennaModel : public AntennaModel
 {
   public:
-    CircularApertureAntennaModel(void);
+    CircularApertureAntennaModel();
 
-    virtual ~CircularApertureAntennaModel(void);
+    ~CircularApertureAntennaModel() override;
 
     /**
      * \brief Get the type ID.
@@ -91,7 +91,7 @@ class CircularApertureAntennaModel : public AntennaModel
      *
      * \return the antenna radius in meters
      */
-    double GetApertureRadius();
+    double GetApertureRadius() const;
 
     /**
      * \brief Set the antenna operating frequency
@@ -105,7 +105,7 @@ class CircularApertureAntennaModel : public AntennaModel
      *
      * \return the antenna operating freqyency, in Hz
      */
-    double GetOperatingFrequency();
+    double GetOperatingFrequency() const;
 
     /**
      * \brief Set the antenna max gain
@@ -119,7 +119,7 @@ class CircularApertureAntennaModel : public AntennaModel
      *
      * \return the antenna max gain in dB
      */
-    double GetMaxGain();
+    double GetMaxGain() const;
 
     /**
      * \brief Get the gain in dB, using Bessel equation of first kind and first order.
@@ -129,7 +129,7 @@ class CircularApertureAntennaModel : public AntennaModel
      *
      * \return the antenna gain at the specified Angles a
      */
-    virtual double GetGainDb(Angles a) override;
+    double GetGainDb(Angles a) override;
 
   private:
     Angles m_antennaOrientation{

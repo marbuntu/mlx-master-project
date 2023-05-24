@@ -37,7 +37,7 @@ class GeocentricConstantPositionMobilityModel : public MobilityModel
      * Register this type with the TypeId system.
      * \return the object TypeId
      */
-    static TypeId GetTypeId(void);
+    static TypeId GetTypeId();
     /**
      * Create a position located at coordinates (0,0,0)
      */
@@ -59,7 +59,7 @@ class GeocentricConstantPositionMobilityModel : public MobilityModel
      * \brief Get the position using geographic (geodetic) coordinates
      * \return Vector containing (latitude, longitude, altitude)
      */
-    virtual Vector GetGeographicPosition(void) const;
+    virtual Vector GetGeographicPosition() const;
 
     /**
      * \brief Set the position using geographic coordinates
@@ -71,7 +71,7 @@ class GeocentricConstantPositionMobilityModel : public MobilityModel
      * \brief Get the position using Geocentric Cartesian coordinates
      * \return Vector containing (X, Y, Z)
      */
-    virtual Vector GetGeocentricPosition(void) const;
+    virtual Vector GetGeocentricPosition() const;
 
     /**
      * \brief Set the position using geographic coordinates
@@ -89,13 +89,13 @@ class GeocentricConstantPositionMobilityModel : public MobilityModel
      * \brief Get the reference point for coordinate translation
      * \return Vector containing geographic reference point
      */
-    virtual Vector GetCoordinateTranslationReferencePoint(void) const;
+    virtual Vector GetCoordinateTranslationReferencePoint() const;
 
     /**
      * \brief Get the position in planar Cartesian coordinates, using m_geographicReferencePoint as
      * reference. \return Vector containing the planar Cartesian coordinates (X, Y, Z)
      */
-    virtual Vector GetPosition(void) const;
+    virtual Vector GetPosition() const;
 
     /**
      * \brief Set the position in planar Cartesian coordinates, using m_geographicReferencePoint as
@@ -115,7 +115,7 @@ class GeocentricConstantPositionMobilityModel : public MobilityModel
      * \brief Get the position in planar Cartesian coordinates, using m_geographicReferencePoint as
      * reference. \return Vector containing the planar Cartesian coordinates (X, Y, Z)
      */
-    virtual Vector DoGetPosition(void) const;
+    virtual Vector DoGetPosition() const;
     /**
      * \brief Set the position in planar Cartesian coordinates, using m_geographicReferencePoint as
      * reference. \param position Vector containing the planar Cartesian coordinates (X, Y, Z)
@@ -131,7 +131,7 @@ class GeocentricConstantPositionMobilityModel : public MobilityModel
      * \brief Get the position using geographic (geodetic) coordinates
      * \return Vector containing (latitude, longitude, altitude)
      */
-    virtual Vector DoGetGeographicPosition(void) const;
+    virtual Vector DoGetGeographicPosition() const;
     /**
      * \brief Set the position using geographic coordinates
      * \param position pointer to a Vector containing (latitude, longitude, altitude)
@@ -141,7 +141,7 @@ class GeocentricConstantPositionMobilityModel : public MobilityModel
      * \brief Get the position using Geocentric Cartesian coordinates
      * \return Vector containing (X, Y, Z)
      */
-    virtual Vector DoGetGeocentricPosition(void) const;
+    virtual Vector DoGetGeocentricPosition() const;
     /**
      * \brief Set the position using Geocentric coordinates
      * \param position pointer to a Vector containing (X, Y, Z)
@@ -165,9 +165,9 @@ class GeocentricConstantPositionMobilityModel : public MobilityModel
      * \brief Get the reference point for coordinate translation
      * \return Vector containing geographic reference point
      */
-    virtual Vector DoGetCoordinateTranslationReferencePoint(void) const;
+    virtual Vector DoGetCoordinateTranslationReferencePoint() const;
 
-    virtual Vector DoGetVelocity(void) const;
+    virtual Vector DoGetVelocity() const;
 
     /**
      * the constant Geographic position, in degrees, in the order:

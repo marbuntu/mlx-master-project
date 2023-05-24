@@ -874,7 +874,7 @@ ThreeGppIndoorOpenOfficeChannelConditionModel::ComputePlos(Ptr<const MobilityMod
 NS_OBJECT_ENSURE_REGISTERED(ThreeGppNTNDenseUrbanChannelConditionModel);
 
 TypeId
-ThreeGppNTNDenseUrbanChannelConditionModel::GetTypeId(void)
+ThreeGppNTNDenseUrbanChannelConditionModel::GetTypeId()
 {
     static TypeId tid = TypeId("ns3::ThreeGppNTNDenseUrbanChannelConditionModel")
                             .SetParent<ThreeGppChannelConditionModel>()
@@ -958,7 +958,7 @@ ThreeGppNTNDenseUrbanChannelConditionModel::ComputePlos(Ptr<const MobilityModel>
 NS_OBJECT_ENSURE_REGISTERED(ThreeGppNTNUrbanChannelConditionModel);
 
 TypeId
-ThreeGppNTNUrbanChannelConditionModel::GetTypeId(void)
+ThreeGppNTNUrbanChannelConditionModel::GetTypeId()
 {
     static TypeId tid = TypeId("ns3::ThreeGppNTNUrbanChannelConditionModel")
                             .SetParent<ThreeGppChannelConditionModel>()
@@ -1042,7 +1042,7 @@ ThreeGppNTNUrbanChannelConditionModel::ComputePlos(Ptr<const MobilityModel> a,
 NS_OBJECT_ENSURE_REGISTERED(ThreeGppNTNSuburbanChannelConditionModel);
 
 TypeId
-ThreeGppNTNSuburbanChannelConditionModel::GetTypeId(void)
+ThreeGppNTNSuburbanChannelConditionModel::GetTypeId()
 {
     static TypeId tid = TypeId("ns3::ThreeGppNTNSuburbanChannelConditionModel")
                             .SetParent<ThreeGppChannelConditionModel>()
@@ -1126,7 +1126,7 @@ ThreeGppNTNSuburbanChannelConditionModel::ComputePlos(Ptr<const MobilityModel> a
 NS_OBJECT_ENSURE_REGISTERED(ThreeGppNTNRuralChannelConditionModel);
 
 TypeId
-ThreeGppNTNRuralChannelConditionModel::GetTypeId(void)
+ThreeGppNTNRuralChannelConditionModel::GetTypeId()
 {
     static TypeId tid = TypeId("ns3::ThreeGppNTNRuralChannelConditionModel")
                             .SetParent<ThreeGppChannelConditionModel>()

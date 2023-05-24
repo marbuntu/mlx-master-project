@@ -26,7 +26,7 @@ namespace ns3
 NS_OBJECT_ENSURE_REGISTERED(GeocentricConstantPositionMobilityModel);
 
 TypeId
-GeocentricConstantPositionMobilityModel::GetTypeId(void)
+GeocentricConstantPositionMobilityModel::GetTypeId()
 {
     static TypeId tid = TypeId("ns3::GeocentricConstantPositionMobilityModel")
                             .SetParent<MobilityModel>()
@@ -44,7 +44,7 @@ GeocentricConstantPositionMobilityModel::~GeocentricConstantPositionMobilityMode
 }
 
 Vector
-GeocentricConstantPositionMobilityModel::GetGeographicPosition(void) const
+GeocentricConstantPositionMobilityModel::GetGeographicPosition() const
 {
     return DoGetGeographicPosition();
 }
@@ -56,7 +56,7 @@ GeocentricConstantPositionMobilityModel::SetGeographicPosition(const Vector& pos
 }
 
 Vector
-GeocentricConstantPositionMobilityModel::GetGeocentricPosition(void) const
+GeocentricConstantPositionMobilityModel::GetGeocentricPosition() const
 {
     return DoGetGeocentricPosition();
 }
@@ -82,13 +82,13 @@ GeocentricConstantPositionMobilityModel::SetCoordinateTranslationReferencePoint(
 }
 
 Vector
-GeocentricConstantPositionMobilityModel::GetCoordinateTranslationReferencePoint(void) const
+GeocentricConstantPositionMobilityModel::GetCoordinateTranslationReferencePoint() const
 {
     return DoGetCoordinateTranslationReferencePoint();
 }
 
 Vector
-GeocentricConstantPositionMobilityModel::GetPosition(void) const
+GeocentricConstantPositionMobilityModel::GetPosition() const
 {
     return DoGetPosition();
 }
@@ -107,24 +107,22 @@ GeocentricConstantPositionMobilityModel::GetDistanceFrom(
 }
 
 Vector
-GeocentricConstantPositionMobilityModel::DoGetPosition(void) const
+GeocentricConstantPositionMobilityModel::DoGetPosition() const
 {
-    GeographicPositions gp;
     Vector topographicCoordinates =
-        gp.GeographicToTopocentricCoordinates(m_position,
-                                              m_geographicReferencePoint,
-                                              GeographicPositions::SPHERE);
+        GeographicPositions::GeographicToTopocentricCoordinates(m_position,
+                                                                m_geographicReferencePoint,
+                                                                GeographicPositions::SPHERE);
     return topographicCoordinates;
 }
 
 void
 GeocentricConstantPositionMobilityModel::DoSetPosition(const Vector& position)
 {
-    GeographicPositions gp;
     Vector geographicCoordinates =
-        gp.TopocentricToGeographicCoordinates(position,
-                                              m_geographicReferencePoint,
-                                              GeographicPositions::SPHERE);
+        GeographicPositions::TopocentricToGeographicCoordinates(position,
+                                                                m_geographicReferencePoint,
+                                                                GeographicPositions::SPHERE);
     m_position = geographicCoordinates;
     NotifyCourseChange();
 }
@@ -133,12 +131,11 @@ double
 GeocentricConstantPositionMobilityModel::DoGetDistanceFrom(
     Ptr<const GeocentricConstantPositionMobilityModel> other) const
 {
-    GeographicPositions gp;
-
-    Vector cartesian_coord1 = gp.GeographicToCartesianCoordinates(m_position.x,
-                                                                  m_position.y,
-                                                                  m_position.z,
-                                                                  gp.EarthSpheroidType::SPHERE);
+    Vector cartesian_coord1 = GeographicPositions::GeographicToCartesianCoordinates(
+        m_position.x,
+        m_position.y,
+        m_position.z,
+        GeographicPositions::EarthSpheroidType::SPHERE);
     Vector cartesian_coord2 = other->DoGetGeocentricPosition();
 
     double distance = sqrt(pow(cartesian_coord1.x - cartesian_coord2.x, 2) +
@@ -149,7 +146,7 @@ GeocentricConstantPositionMobilityModel::DoGetDistanceFrom(
 }
 
 Vector
-GeocentricConstantPositionMobilityModel::DoGetGeographicPosition(void) const
+GeocentricConstantPositionMobilityModel::DoGetGeographicPosition() const
 {
     return m_position;
 }
@@ -167,7 +164,7 @@ GeocentricConstantPositionMobilityModel::DoSetGeographicPosition(const Vector& p
 }
 
 Vector
-GeocentricConstantPositionMobilityModel::DoGetGeocentricPosition(void) const
+GeocentricConstantPositionMobilityModel::DoGetGeocentricPosition() const
 {
     GeographicPositions gp;
     Vector geocentric_coord = gp.GeographicToCartesianCoordinates(m_position.x,
@@ -229,13 +226,13 @@ GeocentricConstantPositionMobilityModel::DoSetCoordinateTranslationReferencePoin
 }
 
 Vector
-GeocentricConstantPositionMobilityModel::DoGetCoordinateTranslationReferencePoint(void) const
+GeocentricConstantPositionMobilityModel::DoGetCoordinateTranslationReferencePoint() const
 {
     return m_geographicReferencePoint;
 }
 
 Vector
-GeocentricConstantPositionMobilityModel::DoGetVelocity(void) const
+GeocentricConstantPositionMobilityModel::DoGetVelocity() const
 {
     return Vector(0.0, 0.0, 0.0);
 }

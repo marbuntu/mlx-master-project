@@ -123,7 +123,7 @@ CircularApertureAntennaModel::SetApertureRadius(double r)
 }
 
 double
-CircularApertureAntennaModel::GetApertureRadius()
+CircularApertureAntennaModel::GetApertureRadius() const
 {
     return m_apertureRadius;
 }
@@ -136,7 +136,7 @@ CircularApertureAntennaModel::SetOperatingFrequency(double f)
 }
 
 double
-CircularApertureAntennaModel::GetOperatingFrequency()
+CircularApertureAntennaModel::GetOperatingFrequency() const
 {
     return m_operatingFrequency;
 }
@@ -149,7 +149,7 @@ CircularApertureAntennaModel::SetMaxGain(double gain)
 }
 
 double
-CircularApertureAntennaModel::GetMaxGain()
+CircularApertureAntennaModel::GetMaxGain() const
 {
     return m_maxGain;
 }
@@ -168,11 +168,11 @@ CircularApertureAntennaModel::GetGainDb(Angles a)
     // phi in [0,2*pi], so a conversion is needed
     if (phi1 > -M_PI && phi1 < 0)
     {
-        phi1 = 2 * M_PI - abs(phi1);
+        phi1 = 2 * M_PI - std::abs(phi1);
     }
     if (phi2 > -M_PI && phi2 < 0)
     {
-        phi2 = 2 * M_PI - abs(phi2);
+        phi2 = 2 * M_PI - std::abs(phi2);
     }
 
     // Convert the spherical coordinates to Cartesian coordinates
@@ -205,7 +205,7 @@ CircularApertureAntennaModel::GetGainDb(Angles a)
         double k = (2 * M_PI * m_operatingFrequency) / 299792458;
         double J_1 = std::cyl_bessel_j(1, (k * m_apertureRadius * sin(theta)));
         double denominator = k * m_apertureRadius * sin(theta);
-        gain = 4 * pow(abs((J_1 / denominator)), 2);
+        gain = 4 * pow(std::abs((J_1 / denominator)), 2);
         gain = 10 * log10(gain) + m_maxGain;
     }
 

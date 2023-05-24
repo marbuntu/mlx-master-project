@@ -1556,7 +1556,7 @@ const std::map<int, float> troposphericScintillationLoss{
 NS_OBJECT_ENSURE_REGISTERED(ThreeGppNTNDenseUrbanPropagationLossModel);
 
 TypeId
-ThreeGppNTNDenseUrbanPropagationLossModel::GetTypeId(void)
+ThreeGppNTNDenseUrbanPropagationLossModel::GetTypeId()
 {
     static TypeId tid = TypeId("ns3::ThreeGppNTNDenseUrbanPropagationLossModel")
                             .SetParent<ThreeGppPropagationLossModel>()
@@ -1852,7 +1852,7 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetShadowingCorrelationDistance(
 NS_OBJECT_ENSURE_REGISTERED(ThreeGppNTNUrbanPropagationLossModel);
 
 TypeId
-ThreeGppNTNUrbanPropagationLossModel::GetTypeId(void)
+ThreeGppNTNUrbanPropagationLossModel::GetTypeId()
 {
     static TypeId tid = TypeId("ns3::ThreeGppNTNUrbanPropagationLossModel")
                             .SetParent<ThreeGppPropagationLossModel>()
@@ -2149,7 +2149,7 @@ ThreeGppNTNUrbanPropagationLossModel::GetShadowingCorrelationDistance(
 NS_OBJECT_ENSURE_REGISTERED(ThreeGppNTNSuburbanPropagationLossModel);
 
 TypeId
-ThreeGppNTNSuburbanPropagationLossModel::GetTypeId(void)
+ThreeGppNTNSuburbanPropagationLossModel::GetTypeId()
 {
     static TypeId tid = TypeId("ns3::ThreeGppNTNSuburbanPropagationLossModel")
                             .SetParent<ThreeGppPropagationLossModel>()
@@ -2449,7 +2449,7 @@ ThreeGppNTNSuburbanPropagationLossModel::GetShadowingCorrelationDistance(
 NS_OBJECT_ENSURE_REGISTERED(ThreeGppNTNRuralPropagationLossModel);
 
 TypeId
-ThreeGppNTNRuralPropagationLossModel::GetTypeId(void)
+ThreeGppNTNRuralPropagationLossModel::GetTypeId()
 {
     static TypeId tid = TypeId("ns3::ThreeGppNTNRuralPropagationLossModel")
                             .SetParent<ThreeGppPropagationLossModel>()
