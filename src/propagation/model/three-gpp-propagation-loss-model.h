@@ -194,6 +194,20 @@ class ThreeGppPropagationLossModel : public PropagationLossModel
     virtual bool DoIsO2iLowPenetrationLoss(Ptr<const ChannelCondition> cond) const;
 
     /**
+     * \brief Indicates the condition of the o2i building penetration loss
+     *        (defined in 3GPP TR 38.901 7.4.3.1).
+     *        The default implementation returns the condition as set
+     *        (either based on the buildings materials, or if the probabilistic
+     *        model is used in the ThreeGppChannelConditionModel, then
+     *        based on the result of a random variable).
+     *        The derived classes can change the default behavior by overriding
+     *        this method.
+     * \param cond the ptr to the channel condition model
+     * \return True for low losses, false for high losses
+     */
+    virtual bool DoIsO2iLowPenetrationLoss(Ptr<const ChannelCondition> cond) const;
+
+    /**
      * \brief Computes the pathloss between a and b considering that the line of
      *        sight is obstructed by a vehicle. By default it raises an error to
      *        avoid misuse.
