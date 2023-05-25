@@ -100,7 +100,7 @@ class ThreeGppPropagationLossModel : public PropagationLossModel
                          Ptr<MobilityModel> a,
                          Ptr<MobilityModel> b) const override;
 
-    virtual int64_t DoAssignStreams(int64_t stream) override;
+    int64_t DoAssignStreams(int64_t stream) override;
 
     /**
      * \brief Computes the pathloss between a and b
@@ -360,7 +360,7 @@ class ThreeGppRmaPropagationLossModel : public ThreeGppPropagationLossModel
      * \param b rx mobility model
      * \return pathloss value in dB
      */
-    virtual double GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
+    double GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
 
     /**
      * \brief Returns the minimum of the two independently generated distances
@@ -391,7 +391,7 @@ class ThreeGppRmaPropagationLossModel : public ThreeGppPropagationLossModel
      * \param b rx mobility model
      * \return pathloss value in dB
      */
-    virtual double GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
+    double GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
 
     /**
      * \brief Returns the shadow fading standard deviation
@@ -735,7 +735,7 @@ class ThreeGppNTNDenseUrbanPropagationLossModel : public ThreeGppPropagationLoss
     /**
      * Destructor
      */
-    virtual ~ThreeGppNTNDenseUrbanPropagationLossModel() override;
+    ~ThreeGppNTNDenseUrbanPropagationLossModel() override;
 
     /**
      * \brief Implemented because declared as pure virtual on parents function.
@@ -769,7 +769,7 @@ class ThreeGppNTNDenseUrbanPropagationLossModel : public ThreeGppPropagationLoss
      * \param b rx mobility model
      * \return pathloss value in dB
      */
-    virtual double GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
+    double GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
 
     /**
      * \brief Computes the pathloss between a and b considering that the line of
@@ -778,7 +778,7 @@ class ThreeGppNTNDenseUrbanPropagationLossModel : public ThreeGppPropagationLoss
      * \param b rx mobility model
      * \return pathloss value in dB
      */
-    virtual double GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
+    double GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
 
     /**
      * \brief Returns the shadow fading standard deviation
@@ -787,17 +787,16 @@ class ThreeGppNTNDenseUrbanPropagationLossModel : public ThreeGppPropagationLoss
      * \param cond the LOS/NLOS channel condition
      * \return shadowing std in dB
      */
-    virtual double GetShadowingStd(Ptr<MobilityModel> a,
-                                   Ptr<MobilityModel> b,
-                                   ChannelCondition::LosConditionValue cond) const override;
+    double GetShadowingStd(Ptr<MobilityModel> a,
+                           Ptr<MobilityModel> b,
+                           ChannelCondition::LosConditionValue cond) const override;
 
     /**
      * \brief Returns the shadow fading correlation distance
      * \param cond the LOS/NLOS channel condition
      * \return shadowing correlation distance in meters
      */
-    virtual double GetShadowingCorrelationDistance(
-        ChannelCondition::LosConditionValue cond) const override;
+    double GetShadowingCorrelationDistance(ChannelCondition::LosConditionValue cond) const override;
 
     /**
      * \brief The nested map containing the Shadow Fading and
@@ -829,7 +828,7 @@ class ThreeGppNTNUrbanPropagationLossModel : public ThreeGppPropagationLossModel
     /**
      * Destructor
      */
-    virtual ~ThreeGppNTNUrbanPropagationLossModel() override;
+    ~ThreeGppNTNUrbanPropagationLossModel() override;
 
     /**
      * \brief Implemented because declared as pure virtual on parents function.
@@ -862,7 +861,7 @@ class ThreeGppNTNUrbanPropagationLossModel : public ThreeGppPropagationLossModel
      * \param b rx mobility model
      * \return pathloss value in dB
      */
-    virtual double GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
+    double GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
 
     /**
      * \brief Computes the pathloss between a and b considering that the line of
@@ -871,7 +870,7 @@ class ThreeGppNTNUrbanPropagationLossModel : public ThreeGppPropagationLossModel
      * \param b rx mobility model
      * \return pathloss value in dB
      */
-    virtual double GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
+    double GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
 
     /**
      * \brief Returns the shadow fading standard deviation
@@ -880,17 +879,16 @@ class ThreeGppNTNUrbanPropagationLossModel : public ThreeGppPropagationLossModel
      * \param cond the LOS/NLOS channel condition
      * \return shadowing std in dB
      */
-    virtual double GetShadowingStd(Ptr<MobilityModel> a,
-                                   Ptr<MobilityModel> b,
-                                   ChannelCondition::LosConditionValue cond) const override;
+    double GetShadowingStd(Ptr<MobilityModel> a,
+                           Ptr<MobilityModel> b,
+                           ChannelCondition::LosConditionValue cond) const override;
 
     /**
      * \brief Returns the shadow fading correlation distance
      * \param cond the LOS/NLOS channel condition
      * \return shadowing correlation distance in meters
      */
-    virtual double GetShadowingCorrelationDistance(
-        ChannelCondition::LosConditionValue cond) const override;
+    double GetShadowingCorrelationDistance(ChannelCondition::LosConditionValue cond) const override;
 
     /**
      * \brief The nested map containing the Shadow Fading and
@@ -922,7 +920,7 @@ class ThreeGppNTNSuburbanPropagationLossModel : public ThreeGppPropagationLossMo
     /**
      * Destructor
      */
-    virtual ~ThreeGppNTNSuburbanPropagationLossModel() override;
+    ~ThreeGppNTNSuburbanPropagationLossModel() override;
 
     /**
      * \brief Implemented because declared as pure virtual on parents function.
@@ -956,7 +954,7 @@ class ThreeGppNTNSuburbanPropagationLossModel : public ThreeGppPropagationLossMo
      * \param b rx mobility model
      * \return pathloss value in dB
      */
-    virtual double GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
+    double GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
 
     /**
      * \brief Computes the pathloss between a and b considering that the line of
@@ -965,7 +963,7 @@ class ThreeGppNTNSuburbanPropagationLossModel : public ThreeGppPropagationLossMo
      * \param b rx mobility model
      * \return pathloss value in dB
      */
-    virtual double GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
+    double GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
 
     /**
      * \brief Returns the shadow fading standard deviation
@@ -974,17 +972,16 @@ class ThreeGppNTNSuburbanPropagationLossModel : public ThreeGppPropagationLossMo
      * \param cond the LOS/NLOS channel condition
      * \return shadowing std in dB
      */
-    virtual double GetShadowingStd(Ptr<MobilityModel> a,
-                                   Ptr<MobilityModel> b,
-                                   ChannelCondition::LosConditionValue cond) const override;
+    double GetShadowingStd(Ptr<MobilityModel> a,
+                           Ptr<MobilityModel> b,
+                           ChannelCondition::LosConditionValue cond) const override;
 
     /**
      * \brief Returns the shadow fading correlation distance
      * \param cond the LOS/NLOS channel condition
      * \return shadowing correlation distance in meters
      */
-    virtual double GetShadowingCorrelationDistance(
-        ChannelCondition::LosConditionValue cond) const override;
+    double GetShadowingCorrelationDistance(ChannelCondition::LosConditionValue cond) const override;
 
     /**
      * \brief The nested map containing the Shadow Fading and
@@ -1016,7 +1013,7 @@ class ThreeGppNTNRuralPropagationLossModel : public ThreeGppPropagationLossModel
     /**
      * Destructor
      */
-    virtual ~ThreeGppNTNRuralPropagationLossModel() override;
+    ~ThreeGppNTNRuralPropagationLossModel() override;
 
     /**
      * \brief Implemented because declared as pure virtual on parents function.
@@ -1049,7 +1046,7 @@ class ThreeGppNTNRuralPropagationLossModel : public ThreeGppPropagationLossModel
      * \param b rx mobility model
      * \return pathloss value in dB
      */
-    virtual double GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
+    double GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
 
     /**
      * \brief Computes the pathloss between a and b considering that the line of
@@ -1058,7 +1055,7 @@ class ThreeGppNTNRuralPropagationLossModel : public ThreeGppPropagationLossModel
      * \param b rx mobility model
      * \return pathloss value in dB
      */
-    virtual double GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
+    double GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
 
     /**
      * \brief Returns the shadow fading standard deviation
@@ -1067,17 +1064,16 @@ class ThreeGppNTNRuralPropagationLossModel : public ThreeGppPropagationLossModel
      * \param cond the LOS/NLOS channel condition
      * \return shadowing std in dB
      */
-    virtual double GetShadowingStd(Ptr<MobilityModel> a,
-                                   Ptr<MobilityModel> b,
-                                   ChannelCondition::LosConditionValue cond) const override;
+    double GetShadowingStd(Ptr<MobilityModel> a,
+                           Ptr<MobilityModel> b,
+                           ChannelCondition::LosConditionValue cond) const override;
 
     /**
      * \brief Returns the shadow fading correlation distance
      * \param cond the LOS/NLOS channel condition
      * \return shadowing correlation distance in meters
      */
-    virtual double GetShadowingCorrelationDistance(
-        ChannelCondition::LosConditionValue cond) const override;
+    double GetShadowingCorrelationDistance(ChannelCondition::LosConditionValue cond) const override;
 
     /**
      * \brief The nested map containing the Shadow Fading and

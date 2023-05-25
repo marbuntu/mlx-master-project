@@ -75,7 +75,7 @@ class ThreeGppV2vUrbanPropagationLossModel : public ThreeGppPropagationLossModel
      * \param b mobility model of one of the two communicating nodes
      * \return pathloss value in dB
      */
-    virtual double GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
+    double GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
 
     /**
      * \brief Returns the minimum of the two independently generated distances
@@ -101,7 +101,7 @@ class ThreeGppV2vUrbanPropagationLossModel : public ThreeGppPropagationLossModel
      * \param b mobility model of one of the two communicating nodes
      * \return pathloss value in dB
      */
-    virtual double GetLossNlosv(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
+    double GetLossNlosv(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
 
     /**
      * \brief Computes the pathloss between a and b considering that the line of
@@ -110,7 +110,7 @@ class ThreeGppV2vUrbanPropagationLossModel : public ThreeGppPropagationLossModel
      * \param b mobility model of one of the two communicating nodes
      * \return pathloss value in dB
      */
-    virtual double GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
+    double GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
 
     /**
      * \brief Computes the additional loss due to an obstruction caused by a vehicle
@@ -178,7 +178,7 @@ class ThreeGppV2vHighwayPropagationLossModel : public ThreeGppV2vUrbanPropagatio
      * \param b mobility model of one of the two communicating nodes
      * \return pathloss value in dB
      */
-    virtual double GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
+    double GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const override;
 };
 
 } // namespace ns3

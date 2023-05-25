@@ -42,7 +42,7 @@ class GeocentricConstantPositionMobilityModel : public MobilityModel
      * Create a position located at coordinates (0,0,0)
      */
     GeocentricConstantPositionMobilityModel();
-    virtual ~GeocentricConstantPositionMobilityModel();
+    ~GeocentricConstantPositionMobilityModel() override;
 
     /**
      * \brief Computes elevation angle between a ground terminal and a HAPS/Satellite.
@@ -91,36 +91,17 @@ class GeocentricConstantPositionMobilityModel : public MobilityModel
      */
     virtual Vector GetCoordinateTranslationReferencePoint() const;
 
-    /**
-     * \brief Get the position in planar Cartesian coordinates, using m_geographicReferencePoint as
-     * reference. \return Vector containing the planar Cartesian coordinates (X, Y, Z)
-     */
-    virtual Vector GetPosition() const;
-
-    /**
-     * \brief Set the position in planar Cartesian coordinates, using m_geographicReferencePoint as
-     * reference. \param position Vector containing the planar Cartesian coordinates (X, Y, Z)
-     */
-    virtual void SetPosition(const Vector& position);
-
-    /**
-     * \brief Get the distance between two nodes.
-     * \param other the mobility model for which the distance from will be calculated
-     * \return the distance in meters
-     */
-    double GetDistanceFrom(Ptr<const GeocentricConstantPositionMobilityModel> other) const;
-
   private:
     /**
      * \brief Get the position in planar Cartesian coordinates, using m_geographicReferencePoint as
      * reference. \return Vector containing the planar Cartesian coordinates (X, Y, Z)
      */
-    virtual Vector DoGetPosition() const;
+    Vector DoGetPosition() const override;
     /**
      * \brief Set the position in planar Cartesian coordinates, using m_geographicReferencePoint as
      * reference. \param position Vector containing the planar Cartesian coordinates (X, Y, Z)
      */
-    virtual void DoSetPosition(const Vector& position);
+    void DoSetPosition(const Vector& position) override;
     /**
      * \brief Get the distance between two nodes.
      * \param other the mobility model for which the distance from will be calculated
@@ -167,7 +148,7 @@ class GeocentricConstantPositionMobilityModel : public MobilityModel
      */
     virtual Vector DoGetCoordinateTranslationReferencePoint() const;
 
-    virtual Vector DoGetVelocity() const;
+    Vector DoGetVelocity() const override;
 
     /**
      * the constant Geographic position, in degrees, in the order:

@@ -88,25 +88,6 @@ GeocentricConstantPositionMobilityModel::GetCoordinateTranslationReferencePoint(
 }
 
 Vector
-GeocentricConstantPositionMobilityModel::GetPosition() const
-{
-    return DoGetPosition();
-}
-
-void
-GeocentricConstantPositionMobilityModel::SetPosition(const Vector& position)
-{
-    return DoSetPosition(position);
-}
-
-double
-GeocentricConstantPositionMobilityModel::GetDistanceFrom(
-    Ptr<const GeocentricConstantPositionMobilityModel> other) const
-{
-    return DoGetDistanceFrom(other);
-}
-
-Vector
 GeocentricConstantPositionMobilityModel::DoGetPosition() const
 {
     Vector topographicCoordinates =
@@ -166,19 +147,20 @@ GeocentricConstantPositionMobilityModel::DoSetGeographicPosition(const Vector& p
 Vector
 GeocentricConstantPositionMobilityModel::DoGetGeocentricPosition() const
 {
-    GeographicPositions gp;
-    Vector geocentric_coord = gp.GeographicToCartesianCoordinates(m_position.x,
-                                                                  m_position.y,
-                                                                  m_position.z,
-                                                                  gp.EarthSpheroidType::SPHERE);
+    Vector geocentric_coord =
+        GeographicPositions::GeographicToCartesianCoordinates(m_position.x,
+                                                              m_position.y,
+                                                              m_position.z,
+                                                              GeographicPositions::SPHERE);
     return geocentric_coord;
 }
 
 void
 GeocentricConstantPositionMobilityModel::DoSetGeocentricPosition(const Vector& position)
 {
-    GeographicPositions gp;
-    Vector geographic_coord = gp.CartesianToGeographicCoordinates(position, gp.SPHERE);
+    Vector geographic_coord =
+        GeographicPositions::CartesianToGeographicCoordinates(position,
+                                                              GeographicPositions::SPHERE);
     m_position = geographic_coord;
     NotifyCourseChange();
 }

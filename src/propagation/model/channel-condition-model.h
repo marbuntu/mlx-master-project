@@ -809,7 +809,7 @@ class ThreeGppNTNDenseUrbanChannelConditionModel : public ThreeGppChannelConditi
     /**
      * Destructor for the ThreeGppNTNDenseUrbanChannelConditionModel class
      */
-    virtual ~ThreeGppNTNDenseUrbanChannelConditionModel() override;
+    ~ThreeGppNTNDenseUrbanChannelConditionModel() override;
 
   private:
     /**
@@ -820,8 +820,7 @@ class ThreeGppNTNDenseUrbanChannelConditionModel : public ThreeGppChannelConditi
      * \param b rx mobility model
      * \return the LOS probability
      */
-    virtual double ComputePlos(Ptr<const MobilityModel> a,
-                               Ptr<const MobilityModel> b) const override;
+    double ComputePlos(Ptr<const MobilityModel> a, Ptr<const MobilityModel> b) const override;
 };
 
 /**
@@ -850,7 +849,7 @@ class ThreeGppNTNUrbanChannelConditionModel : public ThreeGppChannelConditionMod
     /**
      * Destructor for the ThreeGppNTNUrbanChannelConditionModel class
      */
-    virtual ~ThreeGppNTNUrbanChannelConditionModel() override;
+    ~ThreeGppNTNUrbanChannelConditionModel() override;
 
   private:
     /**
@@ -861,8 +860,7 @@ class ThreeGppNTNUrbanChannelConditionModel : public ThreeGppChannelConditionMod
      * \param b rx mobility model
      * \return the LOS probability
      */
-    virtual double ComputePlos(Ptr<const MobilityModel> a,
-                               Ptr<const MobilityModel> b) const override;
+    double ComputePlos(Ptr<const MobilityModel> a, Ptr<const MobilityModel> b) const override;
 };
 
 /**
@@ -891,7 +889,7 @@ class ThreeGppNTNSuburbanChannelConditionModel : public ThreeGppChannelCondition
     /**
      * Destructor for the ThreeGppNTNSuburbanChannelConditionModel class
      */
-    virtual ~ThreeGppNTNSuburbanChannelConditionModel() override;
+    ~ThreeGppNTNSuburbanChannelConditionModel() override;
 
   private:
     /**
@@ -902,8 +900,7 @@ class ThreeGppNTNSuburbanChannelConditionModel : public ThreeGppChannelCondition
      * \param b rx mobility model
      * \return the LOS probability
      */
-    virtual double ComputePlos(Ptr<const MobilityModel> a,
-                               Ptr<const MobilityModel> b) const override;
+    double ComputePlos(Ptr<const MobilityModel> a, Ptr<const MobilityModel> b) const override;
 };
 
 /**
@@ -932,7 +929,7 @@ class ThreeGppNTNRuralChannelConditionModel : public ThreeGppChannelConditionMod
     /**
      * Destructor for the ThreeGppNTNRuralChannelConditionModel class
      */
-    virtual ~ThreeGppNTNRuralChannelConditionModel() override;
+    ~ThreeGppNTNRuralChannelConditionModel() override;
 
   private:
     /**
@@ -943,8 +940,7 @@ class ThreeGppNTNRuralChannelConditionModel : public ThreeGppChannelConditionMod
      * \param b rx mobility model
      * \return the LOS probability
      */
-    virtual double ComputePlos(Ptr<const MobilityModel> a,
-                               Ptr<const MobilityModel> b) const override;
+    double ComputePlos(Ptr<const MobilityModel> a, Ptr<const MobilityModel> b) const override;
 };
 
 } // namespace ns3

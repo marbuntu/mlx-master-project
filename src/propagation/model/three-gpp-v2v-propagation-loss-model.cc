@@ -102,7 +102,8 @@ ThreeGppV2vUrbanPropagationLossModel::GetAdditionalNlosvLoss(Ptr<MobilityModel> 
                                                              Ptr<MobilityModel> b) const
 {
     NS_LOG_FUNCTION(this);
-    double hBs = 0, hUt = 0;
+    double hBs = 0;
+    double hUt = 0;
     double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
     std::pair<double, double> heights = GetUtAndBsHeights(a->GetPosition().z, b->GetPosition().z);
     if (heights.first > heights.second)

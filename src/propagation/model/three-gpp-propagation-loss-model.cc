@@ -582,7 +582,8 @@ ThreeGppRmaPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityMo
     NS_ASSERT_MSG(m_frequency <= 30.0e9,
                   "RMa scenario is valid for frequencies between 0.5 and 30 GHz.");
 
-    double hBs = 0, hUt = 0;
+    double hBs = 0;
+    double hUt = 0;
     double distance2D = Calculate2dDistance(a->GetPosition(), b->GetPosition());
     double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
     std::pair<double, double> heights = GetUtAndBsHeights(a->GetPosition().z, b->GetPosition().z);
@@ -658,7 +659,8 @@ ThreeGppRmaPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityM
     NS_ASSERT_MSG(m_frequency <= 30.0e9,
                   "RMa scenario is valid for frequencies between 0.5 and 30 GHz.");
 
-    double hBs = 0, hUt = 0;
+    double hBs = 0;
+    double hUt = 0;
     double distance2D = Calculate2dDistance(a->GetPosition(), b->GetPosition());
     double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
     std::pair<double, double> heights = GetUtAndBsHeights(a->GetPosition().z, b->GetPosition().z);
@@ -864,7 +866,8 @@ ThreeGppUmaPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityMo
 {
     NS_LOG_FUNCTION(this);
 
-    double hBs = 0, hUt = 0;
+    double hBs = 0;
+    double hUt = 0;
     double distance2D = Calculate2dDistance(a->GetPosition(), b->GetPosition());
     double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
     std::pair<double, double> heights = GetUtAndBsHeights(a->GetPosition().z, b->GetPosition().z);
@@ -944,7 +947,8 @@ ThreeGppUmaPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityM
 {
     NS_LOG_FUNCTION(this);
 
-    double hBs = 0, hUt = 0;
+    double hBs = 0;
+    double hUt = 0;
     double distance2D = Calculate2dDistance(a->GetPosition(), b->GetPosition());
     double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
     std::pair<double, double> heights = GetUtAndBsHeights(a->GetPosition().z, b->GetPosition().z);
@@ -1113,7 +1117,8 @@ ThreeGppUmiStreetCanyonPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
 {
     NS_LOG_FUNCTION(this);
 
-    double hBs = 0, hUt = 0;
+    double hBs = 0;
+    double hUt = 0;
     double distance2D = Calculate2dDistance(a->GetPosition(), b->GetPosition());
     double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
     std::pair<double, double> heights = GetUtAndBsHeights(a->GetPosition().z, b->GetPosition().z);
@@ -1187,7 +1192,8 @@ ThreeGppUmiStreetCanyonPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
 {
     NS_LOG_FUNCTION(this);
 
-    double hBs = 0, hUt = 0;
+    double hBs = 0;
+    double hUt = 0;
     double distance2D = Calculate2dDistance(a->GetPosition(), b->GetPosition());
     double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
     std::pair<double, double> heights = GetUtAndBsHeights(a->GetPosition().z, b->GetPosition().z);
