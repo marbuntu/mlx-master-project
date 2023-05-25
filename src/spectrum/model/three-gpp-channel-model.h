@@ -26,6 +26,7 @@
 #include <ns3/channel-condition-model.h>
 #include <ns3/matrix-based-channel-model.h>
 
+#include <map>
 #include <complex.h>
 #include <unordered_map>
 

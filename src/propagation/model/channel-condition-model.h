@@ -25,6 +25,7 @@
 #include "ns3/vector.h"
 
 #include <unordered_map>
+#include <map>
 
 namespace ns3
 {

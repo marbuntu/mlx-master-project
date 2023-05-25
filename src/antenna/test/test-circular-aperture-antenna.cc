@@ -155,11 +155,11 @@ CircularApertureAntennaModelTestCase::ComputeGain(Ptr<CircularApertureAntennaMod
     // phi in [0,2*pi], so a conversion is needed
     if (phi1 > -M_PI && phi1 < 0)
     {
-        phi1 = 2 * M_PI - abs(phi1);
+        phi1 = 2 * M_PI - fabs(phi1);
     }
     if (phi2 > -M_PI && phi2 < 0)
     {
-        phi2 = 2 * M_PI - abs(phi2);
+        phi2 = 2 * M_PI - fabs(phi2);
     }
 
     // Convert the spherical coordinates to Cartesian coordinates
@@ -192,7 +192,7 @@ CircularApertureAntennaModelTestCase::ComputeGain(Ptr<CircularApertureAntennaMod
         double k = (2 * M_PI * operatingFrequency) / 299792458;
         double J_1 = std::cyl_bessel_j(1, (k * apertureRadius * sin(theta)));
         double denominator = k * apertureRadius * sin(theta);
-        gain = 4 * pow(abs((J_1 / denominator)), 2);
+        gain = 4 * pow(fabs((J_1 / denominator)), 2);
         gain = 10 * log10(gain) + maxGain;
     }
 
