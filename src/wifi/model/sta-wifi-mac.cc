@@ -30,6 +30,8 @@
 #include "wifi-net-device.h"
 #include "wifi-phy.h"
 
+#include "ns3/eht-configuration.h"
+#include "ns3/emlsr-manager.h"
 #include "ns3/he-configuration.h"
 #include "ns3/ht-configuration.h"
 #include "ns3/log.h"
@@ -153,6 +155,11 @@ StaWifiMac::DoDispose()
         m_assocManager->Dispose();
     }
     m_assocManager = nullptr;
+    if (m_emlsrManager)
+    {
+        m_emlsrManager->Dispose();
+    }
+    m_emlsrManager = nullptr;
     WifiMac::DoDispose();
 }
 
@@ -192,6 +199,20 @@ StaWifiMac::SetAssocManager(Ptr<WifiAssocManager> assocManager)
     NS_LOG_FUNCTION(this << assocManager);
     m_assocManager = assocManager;
     m_assocManager->SetStaWifiMac(this);
+}
+
+void
+StaWifiMac::SetEmlsrManager(Ptr<EmlsrManager> emlsrManager)
+{
+    NS_LOG_FUNCTION(this << emlsrManager);
+    m_emlsrManager = emlsrManager;
+    m_emlsrManager->SetWifiMac(this);
+}
+
+Ptr<EmlsrManager>
+StaWifiMac::GetEmlsrManager() const
+{
+    return m_emlsrManager;
 }
 
 uint16_t
@@ -353,8 +374,22 @@ StaWifiMac::GetMultiLinkElement(bool isReassoc, uint8_t linkId) const
     // and the EML Capabilities subfields, and shall not include the Link ID Info, the BSS
     // Parameters Change Count, and the Medium Synchronization Delay Information subfields
     // (Sec. 35.3.5.4 of 802.11be D2.0)
-    // TODO Add the MLD Capabilities and Operations and the EML Capabilities subfields
+    // TODO Add the MLD Capabilities and Operations subfield
     multiLinkElement.SetMldMacAddress(GetAddress());
+
+    if (m_emlsrManager) // EMLSR Manager is only installed if EMLSR is activated
+    {
+        multiLinkElement.SetEmlsrSupported(true);
+        TimeValue time;
+        m_emlsrManager->GetAttribute("EmlsrPaddingDelay", time);
+        multiLinkElement.SetEmlsrPaddingDelay(time.Get());
+        m_emlsrManager->GetAttribute("EmlsrTransitionDelay", time);
+        multiLinkElement.SetEmlsrTransitionDelay(time.Get());
+        // When the Transition Timeout subfield is included in a frame sent by a non-AP STA
+        // affiliated with a non-AP MLD, the Transition Timeout subfield is reserved
+        // (Section 9.4.2.312.2.3 of 802.11be D2.3)
+    }
+
     // For each requested link in addition to the link on which the (Re)Association Request
     // frame is transmitted, the Link Info field of the Basic Multi-Link element carried
     // in the (Re)Association Request frame shall contain the corresponding Per-STA Profile
@@ -737,6 +772,12 @@ StaWifiMac::GetSetupLinkIds() const
     return linkIds;
 }
 
+std::optional<uint8_t>
+StaWifiMac::GetApLinkId(uint8_t linkId) const
+{
+    return GetLink(linkId).apLinkId;
+}
+
 Mac48Address
 StaWifiMac::DoGetLocalAddress(const Mac48Address& remoteAddr) const
 {
@@ -925,11 +966,26 @@ StaWifiMac::Receive(Ptr<const WifiMpdu> mpdu, uint8_t linkId)
         ReceiveAssocResp(mpdu, linkId);
         break;
 
+    case WIFI_MAC_MGT_ACTION:
+        if (auto [category, action] = WifiActionHeader::Peek(packet);
+            category == WifiActionHeader::PROTECTED_EHT &&
+            action.protectedEhtAction ==
+                WifiActionHeader::PROTECTED_EHT_EML_OPERATING_MODE_NOTIFICATION)
+        {
+            // this is handled by the EMLSR Manager
+            break;
+        }
+
     default:
         // Invoke the receive handler of our parent class to deal with any
         // other frames. Specifically, this will handle Block Ack-related
         // Management Action frames.
         WifiMac::Receive(mpdu, linkId);
+    }
+
+    if (m_emlsrManager)
+    {
+        m_emlsrManager->NotifyMgtFrameReceived(mpdu, linkId);
     }
 }
 
@@ -1032,6 +1088,7 @@ StaWifiMac::ReceiveAssocResp(Ptr<const WifiMpdu> mpdu, uint8_t linkId)
         return;
     }
 
+    std::optional<Mac48Address> apMldAddress;
     MgtAssocResponseHeader assocResp;
     mpdu->GetPacket()->PeekHeader(assocResp);
     if (m_assocRequestEvent.IsRunning())
@@ -1047,9 +1104,9 @@ StaWifiMac::ReceiveAssocResp(Ptr<const WifiMpdu> mpdu, uint8_t linkId)
         SetBssid(hdr.GetAddr3(), linkId);
         if ((GetNLinks() > 1) && assocResp.Get<MultiLinkElement>().has_value())
         {
-            // this is an ML setup, trace the MLD address (only once)
-            m_assocLogger(*GetWifiRemoteStationManager(linkId)->GetMldAddress(hdr.GetAddr3()));
+            // this is an ML setup, trace the setup link
             m_setupCompleted(linkId, hdr.GetAddr3());
+            apMldAddress = GetWifiRemoteStationManager(linkId)->GetMldAddress(hdr.GetAddr3());
         }
         else
         {
@@ -1126,13 +1183,9 @@ StaWifiMac::ReceiveAssocResp(Ptr<const WifiMpdu> mpdu, uint8_t linkId)
                     NS_LOG_DEBUG("Setup on link " << staLinkid << " completed");
                     UpdateApInfo(assoc, *bssid, *bssid, staLinkid);
                     SetBssid(*bssid, staLinkid);
-                    if (m_state != ASSOCIATED)
-                    {
-                        m_assocLogger(
-                            *GetWifiRemoteStationManager(staLinkid)->GetMldAddress(*bssid));
-                    }
                     m_setupCompleted(staLinkid, *bssid);
                     SetState(ASSOCIATED);
+                    apMldAddress = GetWifiRemoteStationManager(staLinkid)->GetMldAddress(*bssid);
                     if (!m_linkUp.IsNull())
                     {
                         m_linkUp();
@@ -1152,6 +1205,11 @@ StaWifiMac::ReceiveAssocResp(Ptr<const WifiMpdu> mpdu, uint8_t linkId)
             {
                 GetLink(id).phy->SetOffMode();
             }
+        }
+        if (apMldAddress)
+        {
+            // this is an ML setup, trace the MLD address of the AP (only once)
+            m_assocLogger(*apMldAddress);
         }
     }
 
@@ -1393,6 +1451,12 @@ StaWifiMac::UpdateApInfo(const MgtFrameType& frame,
         // TODO: once we support non constant rate managers, we should add checks here whether EHT
         // is supported by the peer
         GetWifiRemoteStationManager(linkId)->AddStationEhtCapabilities(apAddr, *ehtCapabilities);
+
+        if (const auto& mle = frame.template Get<MultiLinkElement>();
+            mle && mle->HasEmlCapabilities() && m_emlsrManager)
+        {
+            m_emlsrManager->SetTransitionTimeout(mle->GetTransitionTimeout());
+        }
     };
 
     // process Information Elements included in the current frame variant

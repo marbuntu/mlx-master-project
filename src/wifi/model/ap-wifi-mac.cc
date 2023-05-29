@@ -23,7 +23,6 @@
 
 #include "amsdu-subframe-header.h"
 #include "channel-access-manager.h"
-#include "frame-exchange-manager.h"
 #include "mac-rx-middle.h"
 #include "mac-tx-middle.h"
 #include "mgt-headers.h"
@@ -35,6 +34,8 @@
 #include "wifi-net-device.h"
 #include "wifi-phy.h"
 
+#include "ns3/eht-configuration.h"
+#include "ns3/eht-frame-exchange-manager.h"
 #include "ns3/he-configuration.h"
 #include "ns3/ht-configuration.h"
 #include "ns3/log.h"
@@ -666,6 +667,24 @@ ApWifiMac::GetMultiLinkElement(uint8_t linkId, WifiMacType frameType, const Mac4
     mle.SetMldMacAddress(GetAddress());
     mle.SetLinkIdInfo(linkId);
     mle.SetBssParamsChangeCount(0);
+
+    auto ehtConfiguration = GetEhtConfiguration();
+    NS_ASSERT(ehtConfiguration);
+
+    if (BooleanValue emlsrActivated;
+        ehtConfiguration->GetAttributeFailSafe("EmlsrActivated", emlsrActivated) &&
+        emlsrActivated.Get())
+    {
+        mle.SetEmlsrSupported(true);
+        // When the EMLSR Padding Delay subfield is included in a frame sent by an AP affiliated
+        // with an AP MLD, the EMLSR Padding Delay subfield is reserved.
+        // When the EMLSR Transition Delay subfield is included in a frame sent by an AP affiliated
+        // with an AP MLD, the EMLSR Transition Delay subfield is reserved. (Sec. 9.4.2.312.2.3
+        // of 802.11be D2.3)
+        TimeValue time;
+        ehtConfiguration->GetAttribute("TransitionTimeout", time);
+        mle.SetTransitionTimeout(time.Get());
+    }
 
     // if the Multi-Link Element is being inserted in a (Re)Association Response frame
     // and the remote station is affiliated with an MLD, try multi-link setup
@@ -1617,8 +1636,10 @@ ApWifiMac::Receive(Ptr<const WifiMpdu> mpdu, uint8_t linkId)
         }
         else if (hdr->GetAddr1() == GetFrameExchangeManager(linkId)->GetAddress())
         {
-            if (hdr->IsAssocReq() || hdr->IsReassocReq())
+            switch (hdr->GetType())
             {
+            case WIFI_MAC_MGT_ASSOCIATION_REQUEST:
+            case WIFI_MAC_MGT_REASSOCIATION_REQUEST: {
                 NS_LOG_DEBUG(((hdr->IsAssocReq()) ? "Association" : "Reassociation")
                              << " request received from " << from
                              << ((GetNLinks() > 1) ? " on link ID " + std::to_string(linkId) : ""));
@@ -1643,8 +1664,7 @@ ApWifiMac::Receive(Ptr<const WifiMpdu> mpdu, uint8_t linkId)
                 SendAssocResp(hdr->GetAddr2(), hdr->IsReassocReq(), linkId);
                 return;
             }
-            else if (hdr->IsDisassociation())
-            {
+            case WIFI_MAC_MGT_DISASSOCIATION: {
                 NS_LOG_DEBUG("Disassociation received from " << from);
                 GetWifiRemoteStationManager(linkId)->RecordDisassociated(from);
                 auto& staList = GetLink(linkId).staList;
@@ -1669,6 +1689,25 @@ ApWifiMac::Receive(Ptr<const WifiMpdu> mpdu, uint8_t linkId)
                     }
                 }
                 return;
+            }
+            case WIFI_MAC_MGT_ACTION: {
+                auto pkt = mpdu->GetPacket()->Copy();
+                auto [category, action] = WifiActionHeader::Remove(pkt);
+                if (category == WifiActionHeader::PROTECTED_EHT &&
+                    action.protectedEhtAction ==
+                        WifiActionHeader::PROTECTED_EHT_EML_OPERATING_MODE_NOTIFICATION &&
+                    IsAssociated(hdr->GetAddr2()))
+                {
+                    // received an EML Operating Mode Notification frame from an associated station
+                    MgtEmlOperatingModeNotification frame;
+                    pkt->RemoveHeader(frame);
+                    ReceiveEmlNotification(frame, hdr->GetAddr2(), linkId);
+                    return;
+                }
+                break;
+            }
+            default:;
+                // do nothing
             }
         }
     }
@@ -1789,7 +1828,7 @@ ApWifiMac::ReceiveAssocRequest(const AssocReqRefVariant& assoc,
             {
                 remoteStationManager->AddStationHtCapabilities(from, *htCapabilities);
             }
-            // const ExtendedCapabilities& extendedCapabilities = frame.GetExtendedCapabilities ();
+            // const ExtendedCapabilities& extendedCapabilities = frame.GetExtendedCapabilities();
             // TODO: to be completed
         }
         if (GetVhtSupported(linkId))
@@ -1896,6 +1935,45 @@ ApWifiMac::ParseReportedStaInfo(const AssocReqRefVariant& assoc, Mac48Address fr
     };
 
     std::visit(recvMle, assoc);
+}
+
+void
+ApWifiMac::ReceiveEmlNotification(MgtEmlOperatingModeNotification& frame,
+                                  const Mac48Address& sender,
+                                  uint8_t linkId)
+{
+    NS_LOG_FUNCTION(this << frame << sender << linkId);
+
+    auto ehtConfiguration = GetEhtConfiguration();
+
+    if (BooleanValue emlsrActivated;
+        !ehtConfiguration ||
+        !ehtConfiguration->GetAttributeFailSafe("EmlsrActivated", emlsrActivated) ||
+        !emlsrActivated.Get())
+    {
+        NS_LOG_DEBUG(
+            "Received an EML Operating Mode Notification frame but EMLSR is not activated");
+        return;
+    }
+
+    // An AP MLD with dot11EHTEMLSROptionActivated equal to true sets the EMLSR Mode subfield
+    // to the value obtained from the EMLSR Mode subfield of the received EML Operating Mode
+    // Notification frame. (Sec. 9.6.35.8 of 802.11be D3.0)
+
+    // When included in a frame sent by an AP affiliated with an AP MLD, the EMLSR Parameter
+    // Update Control subfield is set to 0. (Sec. 9.6.35.8 of 802.11be D3.0)
+    frame.m_emlControl.emlsrParamUpdateCtrl = 0;
+
+    // An AP MLD with dot11EHTEMLSROptionImplemented equal to true sets the EMLSR Link Bitmap
+    // subfield to the value obtained from the EMLSR Link Bitmap subfield of the received
+    // EML Operating Mode Notification frame. (Sec. 9.6.35.8 of 802.11be D3.0)
+
+    // The EMLSR Parameter Update field [..] is present if [..] the Action frame is sent by
+    // a non-AP STA affiliated with a non-AP MLD (Sec. 9.6.35.8 of 802.11be D3.0)
+    frame.m_emlsrParamUpdate.reset();
+
+    auto ehtFem = StaticCast<EhtFrameExchangeManager>(GetFrameExchangeManager(linkId));
+    ehtFem->SendEmlOperatingModeNotification(sender, frame);
 }
 
 void

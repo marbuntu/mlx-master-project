@@ -40,6 +40,7 @@ class SupportedRates;
 class CapabilityInformation;
 class RandomVariableStream;
 class WifiAssocManager;
+class EmlsrManager;
 
 /**
  * \ingroup wifi
@@ -191,6 +192,18 @@ class StaWifiMac : public WifiMac
     void SetAssocManager(Ptr<WifiAssocManager> assocManager);
 
     /**
+     * Set the EMLSR Manager.
+     *
+     * \param emlsrManager the EMLSR Manager
+     */
+    void SetEmlsrManager(Ptr<EmlsrManager> emlsrManager);
+
+    /**
+     * \return the EMLSR Manager
+     */
+    Ptr<EmlsrManager> GetEmlsrManager() const;
+
+    /**
      * Enqueue a probe request packet for transmission on the given link.
      *
      * \param linkId the ID of the given link
@@ -219,6 +232,12 @@ class StaWifiMac : public WifiMac
      * \return the IDs of the setup links
      */
     std::set<uint8_t> GetSetupLinkIds() const;
+
+    /**
+     * \param linkId the IO of the given link
+     * \return the ID (as set by the AP) of the given link, if the given link has been setup
+     */
+    std::optional<uint8_t> GetApLinkId(uint8_t linkId) const;
 
     /**
      * Return the association ID.
@@ -492,6 +511,7 @@ class StaWifiMac : public WifiMac
     MacState m_state;                       ///< MAC state
     uint16_t m_aid;                         ///< Association AID
     Ptr<WifiAssocManager> m_assocManager;   ///< Association Manager
+    Ptr<EmlsrManager> m_emlsrManager;       ///< EMLSR Manager
     Time m_waitBeaconTimeout;               ///< wait beacon timeout
     Time m_probeRequestTimeout;             ///< probe request timeout
     Time m_assocRequestTimeout;             ///< association request timeout

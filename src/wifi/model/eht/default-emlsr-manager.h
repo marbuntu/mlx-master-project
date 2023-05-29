@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 DERONNE SOFTWARE ENGINEERING
+ * Copyright (c) 2023 Universita' degli Studi di Napoli Federico II
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -14,43 +14,48 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Author: Sébastien Deronne <sebastien.deronne@gmail.com>
+ * Author: Stefano Avallone <stavallo@unina.it>
  */
 
-#ifndef EHT_CONFIGURATION_H
-#define EHT_CONFIGURATION_H
+#ifndef DEFAULT_EMLSR_MANAGER_H
+#define DEFAULT_EMLSR_MANAGER_H
 
-#include "ns3/nstime.h"
-#include "ns3/object.h"
+#include "emlsr-manager.h"
+
+#include <optional>
 
 namespace ns3
 {
 
 /**
- * \brief EHT configuration
  * \ingroup wifi
  *
- * This object stores EHT configuration information, for use in modifying
- * AP or STA behavior and for constructing EHT-related information elements.
- *
+ * DefaultEmlsrManager is the default EMLSR manager.
  */
-class EhtConfiguration : public Object
+class DefaultEmlsrManager : public EmlsrManager
 {
   public:
-    EhtConfiguration();
-    ~EhtConfiguration() override;
-
     /**
      * \brief Get the type ID.
      * \return the object TypeId
      */
     static TypeId GetTypeId();
 
+    DefaultEmlsrManager();
+    ~DefaultEmlsrManager() override;
+
+  protected:
+    uint8_t GetLinkToSendEmlNotification() override;
+    std::optional<uint8_t> ResendNotification(Ptr<const WifiMpdu> mpdu) override;
+
   private:
-    bool m_emlsrActivated;    //!< whether EMLSR option is activated
-    Time m_transitionTimeout; //!< Transition timeout
+    void DoNotifyMgtFrameReceived(Ptr<const WifiMpdu> mpdu, uint8_t linkId) override;
+    void NotifyEmlsrModeChanged() override;
+
+    std::optional<uint8_t> m_assocLinkId; /**< ID of the link on which Association Response
+                                               was received */
 };
 
 } // namespace ns3
 
-#endif /* EHT_CONFIGURATION_H */
+#endif /* DEFAULT_EMLSR_MANAGER_H */
