@@ -1,3 +1,6 @@
 [submodule "mlxsat"]
 	path = contrib/mlxsat
 	url = https://github.com/marbuntu/mlxsat.git
+[submodule "contrib/mlxsat"]
+	path = contrib/mlxsat
+	url = https://github.com/marbuntu/mlx-master-project.git
