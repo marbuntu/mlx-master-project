@@ -1,32 +1,57 @@
-# Prerequisites
-*.d
+*.diff
+*.orig
+*.patch
+*.rej
 
-# Compiled Object files
-*.slo
-*.lo
 *.o
-*.obj
+*.pyc
+*.pyo
 
-# Precompiled Headers
-*.gch
-*.pch
+*.cwnd
+*.dat
+*.log
+*.mob
+*.pcap
+*.plt
+*.routes
+*.tr
+[D|U]l[A-Z][a-z]*Stats.txt
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+\#*#
+*~
 
-# Fortran module files
-*.mod
-*.smod
+testpy-output
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+bindings/python/pybindgen/
 
-# Executables
-*.exe
-*.out
-*.app
+venv/
+
+ms_print.*
+massif.*
+coverity
+TAGS
+
+.lock-ns3_*
+.ns3rc
+
+build-dir/
+build/
+/.cproject
+/.project
+
+version.cache
+
+.gitlab-ci-local/
+.idea/
+cmake-cache/
+cmake-build-debug/
+cmake-build-relwithdebinfo/
+cmake-build-minsizerel/
+cmake-build-release/
+
+.vs/
+
+# Ignore local cache used by e.g. clangd
+.cache/
+
+scratch/ntn-test.cc
