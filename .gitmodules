@@ -1,3 +1,0 @@
-[submodule "contrib/mlxsat"]
-	path = contrib/mlxsat
-	url = https://github.com/marbuntu/mlxsat.git
